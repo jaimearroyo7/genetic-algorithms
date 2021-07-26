@@ -1,9 +1,9 @@
 import unittest
 import datetime
-import genetic
 import operator
 import functools
 import random
+from genetic_algorithms.utils import genetic
 
 
 class CardTests(unittest.TestCase):
