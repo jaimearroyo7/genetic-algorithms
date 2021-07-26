@@ -14,12 +14,19 @@ def _generate_parent(length, gene_set, get_fitness):
 
 
 def _mutate(parent, gene_set, get_fitness):
-    childgenes = parent.Genes[:]
+    child_genes = parent.Genes[:]
     index = random.randrange(0, len(parent.Genes))
     newgene, alternate = random.sample(gene_set, 2)
-    childgenes[index] = alternate if newgene == childgenes[index] else newgene
-    fitness = get_fitness(childgenes)
-    return Chromosome(childgenes, fitness)
+    child_genes[index] = alternate if newgene == child_genes[index] else newgene
+    fitness = get_fitness(child_genes)
+    return Chromosome(child_genes, fitness)
+
+
+def _mutate_custom(parent, custom_mutate, get_fitness):
+    child_genes = parent.Genes[:]
+    custom_mutate(child_genes)
+    fitness = get_fitness(child_genes)
+    return Chromosome(child_genes, fitness)
 
 
 def _get_improvement(new_child, generate_parent):
@@ -36,11 +43,16 @@ def _get_improvement(new_child, generate_parent):
         best_parent = child
 
 
-def get_best(get_fitness, target_len, optimal_fitness, gene_set, display):
+def get_best(get_fitness, target_len, optimal_fitness, gene_set,
+             display, custom_mutate=None):
     random.seed()
 
-    def fnMutate(parent):
-        return _mutate(parent, gene_set, get_fitness)
+    if custom_mutate is None:
+        def fnMutate(parent):
+            return _mutate(parent, gene_set, get_fitness)
+    else:
+        def fnMutate(parent):
+            return _mutate_custom(parent, custom_mutate, get_fitness)
 
     def fnGenerateParent():
         return _generate_parent(target_len, gene_set, get_fitness)

@@ -1,7 +1,7 @@
 import datetime
-import genetic
 import unittest
 import random
+from genetic_algorithms.utils import genetic
 
 
 class GuessPasswordTests(unittest.TestCase):
@@ -35,13 +35,16 @@ class GuessPasswordTests(unittest.TestCase):
         optimalfitness = len(target)
         best = genetic.get_best(
             fnGetFitness, len(target), optimalfitness, self.gene_set, fnDisplay)
-        self.assertEqual(best.Genes, target)
+        self.assertEqual(''.join(best.Genes), target)
 
 
 def display(candidate, start_time):
     time_diff = datetime.datetime.now() - start_time
     print("{0}\t{1}\t{2}".format(
-        candidate.Genes, candidate.Fitness, str(time_diff)))
+        ''.join(candidate.Genes),
+        candidate.Fitness,
+        str(time_diff))
+    )
 
 
 def get_fitness(genes, target):

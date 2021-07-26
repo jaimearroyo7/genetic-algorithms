@@ -1,11 +1,11 @@
 import unittest
 import datetime
-import genetic
+from genetic_algorithms.utils import genetic
 
 
 class OneMaxTests(unittest.TestCase):
     def test(self, length=100):
-        geneset = [0, 1]
+        gene_set = [0, 1]
         start_time = datetime.datetime.now()
     
         def fnDisplay(candidate):
@@ -16,7 +16,7 @@ class OneMaxTests(unittest.TestCase):
     
         optimal_fitness = length
         best = genetic.get_best(fnGetFitness, length, optimal_fitness,
-                                geneset, fnDisplay)
+                                gene_set, fnDisplay)
         self.assertEqual(best.Fitness, optimal_fitness)
 
     def test_benchmark(self):

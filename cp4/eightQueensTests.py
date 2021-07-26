@@ -1,11 +1,11 @@
 import unittest
 import datetime
-import genetic
+from genetic_algorithms.utils import genetic
 
 
 class EightQueensTests(unittest.TestCase):
     def test(self, size=8):
-        geneset = [i for i in range(size)]
+        gene_set = [i for i in range(size)]
         startTime = datetime.datetime.now()
 
         def fnDisplay(candidate):
@@ -16,7 +16,7 @@ class EightQueensTests(unittest.TestCase):
 
         optimalFitness = Fitness(0)
         best = genetic.get_best(fnGetFitness, 2 * size,
-                                optimalFitness, geneset, fnDisplay)
+                                optimalFitness, gene_set, fnDisplay)
         self.assertTrue(not optimalFitness > best.Fitness)
 
     def test_benchmark(self):

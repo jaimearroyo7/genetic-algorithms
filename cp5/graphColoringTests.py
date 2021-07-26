@@ -1,7 +1,7 @@
 import csv
 import unittest
 import datetime
-import genetic
+from genetic_algorithms.utils import genetic
 
 
 class GraphColoringTests(unittest.TestCase):
@@ -14,7 +14,7 @@ class GraphColoringTests(unittest.TestCase):
         }
         colors = ["Orange", "Yellow", "Green", "Blue"]
         colorLookup = {color[0]: color for color in colors}
-        geneset = list(colorLookup.keys())
+        gene_set = list(colorLookup.keys())
 
         startTime = datetime.datetime.now()
 
@@ -25,7 +25,7 @@ class GraphColoringTests(unittest.TestCase):
             return get_fitness(genes, rules, stateIndexLookup)
 
         best = genetic.get_best(fnGetFitness, len(states),
-                                optimalValue, geneset, fnDisplay)
+                                optimalValue, gene_set, fnDisplay)
         self.assertTrue(not optimalValue > best.Fitness)
         keys = sorted(states.keys())
         for index in range(len(states)):

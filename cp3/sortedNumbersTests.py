@@ -1,6 +1,6 @@
 import datetime
 import unittest
-import genetic
+from genetic_algorithms.utils import genetic
 
 
 class SortedNumbersTests(unittest.TestCase):
