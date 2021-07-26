@@ -30,7 +30,7 @@ def get_best(get_fitness, targetlen, optimalfitness, geneset, display):
     display(bestparent)
     if bestparent.Fitness >= optimalfitness:
         return bestparent
-    
+
     while True:
         child = _mutate(bestparent, geneset, get_fitness)
         if bestparent.Fitness >= child.Fitness:
@@ -65,5 +65,6 @@ class Benchmark:
             mean = statistics.mean(timings)
             if i < 10 or i % 10 == 9:
                 print("{0} {1:3.2f} {2:3.2f}".format(
-                    1 + i, mean, statistics.stdev(timings, mean) if i > 1 else 0)
+                    1 + i, mean,
+                    statistics.stdev(timings, mean) if i > 1 else 0)
                 )
