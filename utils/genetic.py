@@ -32,41 +32,37 @@ def _mutate_custom(parent, custom_mutate, get_fitness):
 
 
 def _get_improvement(new_child, generate_parent, maxAge):
-    parent = best_parent = generate_parent()
-    yield best_parent
-    historicalFitnesses = [best_parent.Fitness]
+    parent = bestParent = generate_parent()
+    yield bestParent
+    historicalFitnesses = [bestParent.Fitness]
     while True:
-        child = new_child(best_parent)
+        child = new_child(parent)
         if parent.Fitness > child.Fitness:
             if maxAge is None:
                 continue
             parent.Age += 1
             if maxAge > parent.Age:
                 continue
-            index = bisect_left(
-                historicalFitnesses, child.Fitness, 0, len(historicalFitnesses)
-            )
-            difference = len(historicalFitnesses) - index
-            proportionSimilar = difference / len(historicalFitnesses)
+            index = bisect_left(historicalFitnesses, child.Fitness, 0,
+                                len(historicalFitnesses))
+            proportionSimilar = index / len(historicalFitnesses)
             if random.random() < exp(-proportionSimilar):
                 parent = child
                 continue
-            parent = best_parent
-            parent.Age = 0
+            bestParent.Age = 0
+            parent = bestParent
             continue
-
-        if not child.Fitness > best_parent.Fitness:
+        if not child.Fitness > parent.Fitness:
             # same fitness
             child.Age = parent.Age + 1
             parent = child
             continue
-
+        child.Age = 0
         parent = child
-        parent.Age = 0
-        if child.Fitness > best_parent.Fitness:
-            yield child
-            best_parent = child
-            historicalFitnesses.append(child.Fitness)
+        if child.Fitness > bestParent.Fitness:
+            bestParent = child
+            yield bestParent
+            historicalFitnesses.append(bestParent.Fitness)
 
 
 def get_best(get_fitness, target_len, optimal_fitness, gene_set,
