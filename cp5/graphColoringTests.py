@@ -1,38 +1,42 @@
-import csv
 import unittest
 import datetime
 from genetic_algorithms.utils import genetic
 
 
 class GraphColoringTests(unittest.TestCase):
-    def test(self):
-        states = load_data("adjacent_states.csv")
-        rules = build_rules(states)
-        optimalValue = len(rules)
-        stateIndexLookup = {
-            key: index for index, key in enumerate(sorted(states))
-        }
-        colors = ["Orange", "Yellow", "Green", "Blue"]
-        colorLookup = {color[0]: color for color in colors}
-        gene_set = list(colorLookup.keys())
+    def test_states(self):
+        self.color("adjacent_states.col",
+                   ["Orange", "Yellow", "Green", "Blue"])
 
+    def test_R100_1gb(self):
+        self.color("R100_1gb.col",
+                   ["Red", "Orange", "Yellow", "Green", "Blue", "Indigo"])
+
+    def test_benchmark(self):
+        genetic.Benchmark.run(lambda: self.test_R100_1gb())
+
+    def color(self, file, colors):
+        rules, nodes = load_data(file)
+        optimalValue = len(rules)
+        colorLookup = {color[0]: color for color in colors}
+        geneset = list(colorLookup.keys())
         startTime = datetime.datetime.now()
+        nodeIndexLookup = {key: index
+                           for index, key in enumerate(sorted(nodes))}
 
         def fnDisplay(candidate):
             display(candidate, startTime)
 
         def fnGetFitness(genes):
-            return get_fitness(genes, rules, stateIndexLookup)
+            return get_fitness(genes, rules, nodeIndexLookup)
 
-        best = genetic.get_best(fnGetFitness, len(states),
-                                optimalValue, gene_set, fnDisplay)
+        best = genetic.get_best(fnGetFitness, len(nodes), optimalValue,
+                                geneset, fnDisplay)
         self.assertTrue(not optimalValue > best.Fitness)
-        keys = sorted(states.keys())
-        for index in range(len(states)):
-            print(keys[index] + " is " + colorLookup[best.Genes[index]])
 
-    def test_benchmark(self):
-        genetic.Benchmark.run(lambda: self.test())
+        keys = sorted(nodes)
+        for index in range(len(nodes)):
+            print(keys[index] + " is " + colorLookup[best.Genes[index]])
 
 
 class Rule:
@@ -61,13 +65,25 @@ class Rule:
 
 
 def load_data(localFileName):
-    """ expects: AA,BB;CC where BB and CC are the initial column values in
-     other rows
+    """ expects: T D1 [D2 ... DN]
+        where T is the record type
+        and D1 .. DN are record-type appropriate data elements
     """
+    rules = set()
+    nodes = set()
     with open(localFileName, mode='r') as infile:
-        reader = csv.reader(infile)
-        lookup = {row[0]: row[1].split(';') for row in reader if row}
-    return lookup
+        content = infile.read().splitlines()
+    for row in content:
+        if row[0] == 'e':  # e aa bb, aa and bb are node ids
+            nodeIds = row.split(' ')[1:3]
+            rules.add(Rule(nodeIds[0], nodeIds[1]))
+            nodes.add(nodeIds[0])
+            nodes.add(nodeIds[1])
+            continue
+        if row[0] == 'n':  # n aa ww, aa is a node id, ww is a weight
+            nodeIds = row.split(' ')
+            nodes.add(nodeIds[1])
+    return rules, nodes
 
 
 def build_rules(items):
