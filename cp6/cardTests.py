@@ -9,23 +9,23 @@ from genetic_algorithms.utils import genetic
 class CardTests(unittest.TestCase):
     def test(self):
         gene_set = [i + 1 for i in range(10)]
-        startTime = datetime.datetime.now()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate):
-            display(candidate, startTime)
+        def fn_display(candidate):
+            display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes)
 
         def fnMutate(genes):
             mutate(genes, gene_set)
 
-        optimalFitness = Fitness(36, 360, 0)
+        optimal_fitness = Fitness(36, 360, 0)
         best = genetic.get_best(
-            fnGetFitness, 10, optimalFitness,
-            gene_set, fnDisplay, custom_mutate=fnMutate
+            fn_get_fitness, 10, optimal_fitness,
+            gene_set, fn_display, custom_mutate=fnMutate
         )
-        self.assertTrue(not optimalFitness > best.Fitness)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
     def test_benchmark(self):
         genetic.Benchmark.run(lambda: self.test())
@@ -78,11 +78,11 @@ def get_fitness(genes):
     return Fitness(group1Sum, group2Product, duplicateCount)
 
 
-def display(candidate, startTime):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time):
+    time_diff = datetime.datetime.now() - start_time
     print("{0} - {1}\t{2}\t{3}".format(
         ', '.join(map(str, candidate.Genes[0:5])),
         ', '.join(map(str, candidate.Genes[5:10])),
         candidate.Fitness,
-        str(timeDiff))
+        str(time_diff))
     )

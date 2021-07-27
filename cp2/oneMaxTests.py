@@ -8,15 +8,15 @@ class OneMaxTests(unittest.TestCase):
         gene_set = [0, 1]
         start_time = datetime.datetime.now()
     
-        def fnDisplay(candidate):
+        def fn_display(candidate):
             display(candidate, start_time)
     
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes)
     
         optimal_fitness = length
-        best = genetic.get_best(fnGetFitness, length, optimal_fitness,
-                                gene_set, fnDisplay)
+        best = genetic.get_best(fn_get_fitness, length, optimal_fitness,
+                                gene_set, fn_display)
         self.assertEqual(best.Fitness, optimal_fitness)
 
     def test_benchmark(self):

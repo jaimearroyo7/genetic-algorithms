@@ -26,15 +26,17 @@ class GuessPasswordTests(unittest.TestCase):
     def guess_password(self, target):
         start_time = datetime.datetime.now()
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, target)
 
-        def fnDisplay(candidate):
+        def fn_display(candidate):
             display(candidate, start_time)
 
-        optimalfitness = len(target)
+        optimal_fitness = len(target)
         best = genetic.get_best(
-            fnGetFitness, len(target), optimalfitness, self.gene_set, fnDisplay)
+            fn_get_fitness, len(target),
+            optimal_fitness, self.gene_set, fn_display
+        )
         self.assertEqual(''.join(best.Genes), target)
 
 

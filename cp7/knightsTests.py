@@ -30,12 +30,12 @@ class KnightsTests(unittest.TestCase):
         genetic.Benchmark.run(lambda: self.test_10x10())
 
     def find_knight_positions(self, boardWidth, boardHeight, expectedKnights):
-        startTime = datetime.datetime.now()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate):
-            display(candidate, startTime, boardWidth, boardHeight)
+        def fn_display(candidate):
+            display(candidate, start_time, boardWidth, boardHeight)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, boardWidth, boardHeight)
 
         allPositions = [Position(x, y)
@@ -60,10 +60,10 @@ class KnightsTests(unittest.TestCase):
         def fnCreate():
             return create(fnGetRandomPosition, expectedKnights)
 
-        optimalFitness = boardWidth * boardHeight
-        best = genetic.get_best(fnGetFitness, None, optimalFitness,
-                                None, fnDisplay, fnMutate, fnCreate)
-        self.assertTrue(not optimalFitness > best.Fitness)
+        optimal_fitness = boardWidth * boardHeight
+        best = genetic.get_best(fn_get_fitness, None, optimal_fitness,
+                                None, fn_display, fnMutate, fnCreate)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
 
 class Position:
@@ -147,14 +147,14 @@ def get_fitness(genes, boardWidth, boardHeight):
     return len(attacked)
 
 
-def display(candidate, startTime, boardWidth, boardHeight):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time, boardWidth, boardHeight):
+    time_diff = datetime.datetime.now() - start_time
     board = Board(candidate.Genes, boardWidth, boardHeight)
     board.print()
     print("{0}\n\t{1}\t{2}".format(
         ' '.join(map(str, candidate.Genes)),
         candidate.Fitness,
-        str(timeDiff))
+        str(time_diff))
     )
 
 

@@ -14,40 +14,41 @@ class SortedNumbersTests(unittest.TestCase):
         gene_set = [i for i in range(100)]
         start_time = datetime.datetime.now()
         
-        def fnDisplay(candidate):
+        def fn_display(candidate):
             display(candidate, start_time)
             
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes)
         
         optimal_fitness = Fitness(total_numbers, 0)
         best = genetic.get_best(
-            fnGetFitness,
+            fn_get_fitness,
             total_numbers,
             optimal_fitness,
             gene_set,
-            fnDisplay
+            fn_display
         )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
 
 class Fitness:
-    NumbersInSequenceCount = None
-    TotalGap = None
+    numbers_in_sequence_count = None
+    total_gap = None
 
-    def __init__(self, numbersInSequenceCount, totalGap):
-        self.NumbersInSequenceCount = numbersInSequenceCount
-        self.TotalGap = totalGap
+    def __init__(self, numbers_in_sequence_count, total_gap):
+        self.numbers_in_sequence_count = numbers_in_sequence_count
+        self.total_gap = total_gap
 
     def __gt__(self, other):
-        if self.NumbersInSequenceCount != other.NumbersInSequenceCount:
-            return self.NumbersInSequenceCount > other.NumbersInSequenceCount
-        return self.TotalGap < other.TotalGap
+        if self.numbers_in_sequence_count != other.numbers_in_sequence_count:
+            return self.numbers_in_sequence_count >\
+                   other.numbers_in_sequence_count
+        return self.total_gap < other.total_gap
 
     def __str__(self):
         return "{0} Sequential, {1} Total Gap".format(
-            self.NumbersInSequenceCount,
-            self.TotalGap)
+            self.numbers_in_sequence_count,
+            self.total_gap)
 
 
 def get_fitness(genes):

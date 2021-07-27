@@ -23,30 +23,30 @@ class MagicSquareTests(unittest.TestCase):
     def generate(self, diagonalSize, maxAge):
         nSquared = diagonalSize * diagonalSize
 
-        geneset = [i for i in range(1, nSquared + 1)]
+        gene_set = [i for i in range(1, nSquared + 1)]
         expectedSum = diagonalSize * (nSquared + 1) / 2
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, diagonalSize, expectedSum)
 
-        def fnDisplay(candidate):
-            display(candidate, diagonalSize, startTime)
+        def fn_display(candidate):
+            display(candidate, diagonalSize, start_time)
 
-        geneIndexes = [i for i in range(0, len(geneset))]
+        geneIndexes = [i for i in range(0, len(gene_set))]
 
         def fnMutate(genes):
             mutate(genes, geneIndexes)
 
         def fnCustomCreate():
-            return random.sample(geneset, len(geneset))
+            return random.sample(gene_set, len(gene_set))
 
-        optimalValue = Fitness(0)
-        startTime = datetime.datetime.now()
-        best = genetic.get_best(fnGetFitness, nSquared, optimalValue,
-                                geneset, fnDisplay, fnMutate,
+        optimal_value = Fitness(0)
+        start_time = datetime.datetime.now()
+        best = genetic.get_best(fn_get_fitness, nSquared, optimal_value,
+                                gene_set, fn_display, fnMutate,
                                 fnCustomCreate, maxAge)
 
-        self.assertTrue(not optimalValue > best.Fitness)
+        self.assertTrue(not optimal_value > best.Fitness)
 
 
 class Fitness:
@@ -95,8 +95,8 @@ def get_sums(genes, diagonalSize):
     return rows, columns, northeastDiagonalSum, southeastDiagonalSum
 
 
-def display(candidate, diagonalSize, startTime):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, diagonalSize, start_time):
+    time_diff = datetime.datetime.now() - start_time
     rows, columns, northeastDiagonalSum, southeastDiagonalSum = \
     get_sums(candidate.Genes, diagonalSize)
     for rowNumber in range(diagonalSize):
@@ -104,4 +104,4 @@ def display(candidate, diagonalSize, startTime):
               rowNumber * diagonalSize:(rowNumber + 1) * diagonalSize]
         print("\t ", row, "=", rows[rowNumber])
     print(northeastDiagonalSum, "\t", columns, "\t", southeastDiagonalSum)
-    print(" - - - - - - - - - - -", candidate.Fitness, str(timeDiff))
+    print(" - - - - - - - - - - -", candidate.Fitness, str(time_diff))

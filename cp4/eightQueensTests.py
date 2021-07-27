@@ -6,18 +6,18 @@ from genetic_algorithms.utils import genetic
 class EightQueensTests(unittest.TestCase):
     def test(self, size=8):
         gene_set = [i for i in range(size)]
-        startTime = datetime.datetime.now()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate):
-            display(candidate, startTime, size)
+        def fn_display(candidate):
+            display(candidate, start_time, size)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, size)
 
-        optimalFitness = Fitness(0)
-        best = genetic.get_best(fnGetFitness, 2 * size,
-                                optimalFitness, gene_set, fnDisplay)
-        self.assertTrue(not optimalFitness > best.Fitness)
+        optimal_fitness = Fitness(0)
+        best = genetic.get_best(fn_get_fitness, 2 * size,
+                                optimal_fitness, gene_set, fn_display)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
     def test_benchmark(self):
         genetic.Benchmark.run(lambda: self.test(20))
@@ -56,32 +56,32 @@ class Fitness:
 
 def get_fitness(genes, size):
     board = Board(genes, size)
-    rowsWithQueens = set()
-    colsWithQueens = set()
-    northEastDiagonalsWithQueens = set()
-    southEastDiagonalsWithQueens = set()
+    rows_with_queens = set()
+    cols_with_queens = set()
+    north_east_diagonals_with_queens = set()
+    south_east_diagonals_with_queens = set()
     for row in range(size):
         for col in range(size):
             if board.get(row, col) == 'Q':
-                rowsWithQueens.add(row)
-                colsWithQueens.add(col)
-                northEastDiagonalsWithQueens.add(row + col)
-                southEastDiagonalsWithQueens.add(size - 1 - row + col)
+                rows_with_queens.add(row)
+                cols_with_queens.add(col)
+                north_east_diagonals_with_queens.add(row + col)
+                south_east_diagonals_with_queens.add(size - 1 - row + col)
 
-    total = size - len(rowsWithQueens) \
-        + size - len(colsWithQueens) \
-        + size - len(northEastDiagonalsWithQueens) \
-        + size - len(southEastDiagonalsWithQueens)
+    total = size - len(rows_with_queens) \
+        + size - len(cols_with_queens) \
+        + size - len(north_east_diagonals_with_queens) \
+        + size - len(south_east_diagonals_with_queens)
 
     return Fitness(total)
 
 
-def display(candidate, startTime, size):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time, size):
+    time_diff = datetime.datetime.now() - start_time
     board = Board(candidate.Genes, size)
     board.print()
     print("{0}\t- {1}\t{2}".format(
         ' '.join(map(str, candidate.Genes)),
         candidate.Fitness,
-        str(timeDiff))
+        str(time_diff))
     )
