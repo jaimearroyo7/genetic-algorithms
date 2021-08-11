@@ -9,8 +9,8 @@ from math import exp
 def _generate_parent(length, gene_set, get_fitness):
     genes = []
     while len(genes) < length:
-        samplesize = min(length - len(genes), len(gene_set))
-        genes.extend(random.sample(gene_set, samplesize))
+        sample_size = min(length - len(genes), len(gene_set))
+        genes.extend(random.sample(gene_set, sample_size))
     fitness = get_fitness(genes)
     return Chromosome(genes, fitness)
 
@@ -18,8 +18,9 @@ def _generate_parent(length, gene_set, get_fitness):
 def _mutate(parent, gene_set, get_fitness):
     child_genes = parent.Genes[:]
     index = random.randrange(0, len(parent.Genes))
-    newgene, alternate = random.sample(gene_set, 2)
-    child_genes[index] = alternate if newgene == child_genes[index] else newgene
+    new_gene, alternate = random.sample(gene_set, 2)
+    child_genes[index] = alternate if new_gene == child_genes[
+        index] else new_gene
     fitness = get_fitness(child_genes)
     return Chromosome(child_genes, fitness)
 
@@ -31,26 +32,26 @@ def _mutate_custom(parent, custom_mutate, get_fitness):
     return Chromosome(child_genes, fitness)
 
 
-def _get_improvement(new_child, generate_parent, maxAge):
-    parent = bestParent = generate_parent()
-    yield bestParent
-    historicalFitnesses = [bestParent.Fitness]
+def _get_improvement(new_child, generate_parent, max_age):
+    parent = best_parent = generate_parent()
+    yield best_parent
+    historical_fitnesses = [best_parent.Fitness]
     while True:
         child = new_child(parent)
         if parent.Fitness > child.Fitness:
-            if maxAge is None:
+            if max_age is None:
                 continue
             parent.Age += 1
-            if maxAge > parent.Age:
+            if max_age > parent.Age:
                 continue
-            index = bisect_left(historicalFitnesses, child.Fitness, 0,
-                                len(historicalFitnesses))
-            proportionSimilar = index / len(historicalFitnesses)
-            if random.random() < exp(-proportionSimilar):
+            index = bisect_left(historical_fitnesses, child.Fitness, 0,
+                                len(historical_fitnesses))
+            proportion_similar = index / len(historical_fitnesses)
+            if random.random() < exp(-proportion_similar):
                 parent = child
                 continue
-            bestParent.Age = 0
-            parent = bestParent
+            best_parent.Age = 0
+            parent = best_parent
             continue
         if not child.Fitness > parent.Fitness:
             # same fitness
@@ -59,14 +60,14 @@ def _get_improvement(new_child, generate_parent, maxAge):
             continue
         child.Age = 0
         parent = child
-        if child.Fitness > bestParent.Fitness:
-            bestParent = child
-            yield bestParent
-            historicalFitnesses.append(bestParent.Fitness)
+        if child.Fitness > best_parent.Fitness:
+            best_parent = child
+            yield best_parent
+            historical_fitnesses.append(best_parent.Fitness)
 
 
 def get_best(get_fitness, target_len, optimal_fitness, gene_set,
-             display, custom_mutate=None, custom_create=None, maxAge=None):
+             display, custom_mutate=None, custom_create=None, max_age=None):
     random.seed()
 
     if custom_mutate is None:
@@ -84,7 +85,7 @@ def get_best(get_fitness, target_len, optimal_fitness, gene_set,
             genes = custom_create()
             return Chromosome(genes, get_fitness(genes))
 
-    for improvement in _get_improvement(fnMutate, fnGenerateParent, maxAge):
+    for improvement in _get_improvement(fnMutate, fnGenerateParent, max_age):
         display(improvement)
         if not optimal_fitness > improvement.Fitness:
             return improvement

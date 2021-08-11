@@ -20,7 +20,7 @@ class MagicSquareTests(unittest.TestCase):
     def test_benchmark(self):
         genetic.Benchmark.run(self.test_size_4)
 
-    def generate(self, diagonalSize, maxAge):
+    def generate(self, diagonalSize, max_age):
         nSquared = diagonalSize * diagonalSize
 
         gene_set = [i for i in range(1, nSquared + 1)]
@@ -44,7 +44,7 @@ class MagicSquareTests(unittest.TestCase):
         start_time = datetime.datetime.now()
         best = genetic.get_best(fn_get_fitness, nSquared, optimal_value,
                                 gene_set, fn_display, fnMutate,
-                                fnCustomCreate, maxAge)
+                                fnCustomCreate, max_age)
 
         self.assertTrue(not optimal_value > best.Fitness)
 

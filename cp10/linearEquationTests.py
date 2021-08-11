@@ -9,8 +9,8 @@ class LinearEquationTests(unittest.TestCase):
 
     def solve_unknowns(self, numUnknowns, geneset, equations, fnGenesToInputs):
         startTime = datetime.datetime.now()
-        maxAge = 50
-        window = Window(max(1, int(len(geneset) / (2 * maxAge))),
+        max_age = 50
+        window = Window(max(1, int(len(geneset) / (2 * max_age))),
                         max(1, int(len(geneset) / 3)),
                         int(len(geneset) / 2))
         geneIndexes = [i for i in range(numUnknowns)]
@@ -28,7 +28,7 @@ class LinearEquationTests(unittest.TestCase):
         optimalFitness = Fitness(0)
         best = genetic.get_best(fnGetFitness, numUnknowns,
                                 optimalFitness, geneset, fnDisplay,
-                                maxAge=50)
+                                max_age=50)
         self.assertTrue(not optimalFitness > best.Fitness)
 
     def test_2_unknowns(self):

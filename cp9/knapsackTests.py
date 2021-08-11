@@ -48,7 +48,7 @@ class KnapsackTests(unittest.TestCase):
             mutate(genes, sorted_items, max_weight, max_volume, window)
 
         best = genetic.get_best(fnGetFitness, None, optimal_fitness,
-                                None, fnDisplay, fnMutate, fnCreate, maxAge=50)
+                                None, fnDisplay, fnMutate, fnCreate, max_age=50)
         self.assertTrue(not optimal_fitness > best.Fitness)
 
 
