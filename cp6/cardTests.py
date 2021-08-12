@@ -1,8 +1,9 @@
-import unittest
 import datetime
-import operator
 import functools
+import operator
 import random
+import unittest
+
 from genetic_algorithms.utils import genetic
 
 

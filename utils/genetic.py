@@ -1,7 +1,7 @@
 import random
 import statistics
-import time
 import sys
+import time
 from bisect import bisect_left
 from math import exp
 

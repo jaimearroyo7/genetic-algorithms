@@ -1,7 +1,8 @@
-import unittest
 import datetime
-import sys
 import random
+import sys
+import unittest
+
 from genetic_algorithms.utils import genetic
 
 

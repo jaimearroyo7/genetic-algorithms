@@ -1,7 +1,8 @@
-import unittest
 import datetime
 import fractions
 import random
+import unittest
+
 from genetic_algorithms.utils import genetic
 
 

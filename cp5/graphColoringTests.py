@@ -1,5 +1,6 @@
-import unittest
 import datetime
+import unittest
+
 from genetic_algorithms.utils import genetic
 
 
