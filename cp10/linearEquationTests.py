@@ -8,17 +8,17 @@ from genetic_algorithms.utils import genetic
 
 class LinearEquationTests(unittest.TestCase):
 
-    def solve_unknowns(self, numUnknowns, geneset, equations, fnGenesToInputs):
+    def solve_unknowns(self, numUnknowns, gene_set, equations, fnGenesToInputs):
         startTime = datetime.datetime.now()
         max_age = 50
-        window = Window(max(1, int(len(geneset) / (2 * max_age))),
-                        max(1, int(len(geneset) / 3)),
-                        int(len(geneset) / 2))
-        geneIndexes = [i for i in range(numUnknowns)]
-        sortedGeneset = sorted(geneset)
+        window = Window(max(1, int(len(gene_set) / (2 * max_age))),
+                        max(1, int(len(gene_set) / 3)),
+                        int(len(gene_set) / 2))
+        gene_indexes = [i for i in range(numUnknowns)]
+        sorted_gene_set = sorted(gene_set)
 
         def fnMutate(genes):
-            mutate(genes, sortedGeneset, window, geneIndexes)
+            mutate(genes, sorted_gene_set, window, gene_indexes)
 
         def fnDisplay(candidate):
             display(candidate, startTime, fnGenesToInputs)
@@ -26,14 +26,14 @@ class LinearEquationTests(unittest.TestCase):
         def fnGetFitness(genes):
             return get_fitness(genes, equations)
 
-        optimalFitness = Fitness(0)
+        optimal_fitness = Fitness(0)
         best = genetic.get_best(fnGetFitness, numUnknowns,
-                                optimalFitness, geneset, fnDisplay,
+                                optimal_fitness, gene_set, fnDisplay, fnMutate,
                                 max_age=50)
-        self.assertTrue(not optimalFitness > best.Fitness)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
     def test_2_unknowns(self):
-        geneset = [i for i in range(-5, 5) if i != 0]
+        gene_set = [i for i in range(-5, 5) if i != 0]
 
         def fnGenesToInputs(genes):
             return genes[0], genes[1]
@@ -47,14 +47,14 @@ class LinearEquationTests(unittest.TestCase):
             return 4 * x + 4 * y - 12
 
         equations = [e1, e2]
-        self.solve_unknowns(2, geneset, equations, fnGenesToInputs)
+        self.solve_unknowns(2, gene_set, equations, fnGenesToInputs)
 
     def test_3_unknowns(self):
-        geneRange = [i for i in range(-5, 5) if i != 0]
-        geneset = [i for i in set(
+        gene_range = [i for i in range(-5, 5) if i != 0]
+        gene_set = [i for i in set(
             fractions.Fraction(d, e)
-            for d in geneRange
-            for e in geneRange if e != 0)]
+            for d in gene_range
+            for e in gene_range if e != 0)]
 
         def fnGenesToInputs(genes):
             return genes
@@ -73,12 +73,13 @@ class LinearEquationTests(unittest.TestCase):
                 y, 2) - 6
 
         equations = [e1, e2, e3]
-        self.solve_unknowns(3, geneset, equations, fnGenesToInputs)
+        self.solve_unknowns(3, gene_set, equations, fnGenesToInputs)
 
     def test_4_unknowns(self):
-        geneRange = [i for i in range(-13, 13) if i != 0]
-        geneset = [i for i in set(fractions.Fraction(d, e) for d in geneRange
-                                  for e in geneRange if e != 0)]
+        gene_range = [i for i in range(-13, 13) if i != 0]
+        gene_set = [i for i in set(fractions.Fraction(d, e) for d in gene_range
+                                   for e in gene_range if e != 0)]
+        
         def fnGenesToInputs(genes):
             return genes
 
@@ -103,7 +104,7 @@ class LinearEquationTests(unittest.TestCase):
                 7, 4) * z + fractions.Fraction(4, 3) * a + 9
 
         equations = [e1, e2, e3, e4]
-        self.solve_unknowns(4, geneset, equations, fnGenesToInputs)
+        self.solve_unknowns(4, gene_set, equations, fnGenesToInputs)
 
     def test_benchmark(self):
         genetic.Benchmark.run(lambda: self.test_4_unknowns())
@@ -113,17 +114,17 @@ def get_fitness(genes, equations):
     return Fitness(sum(abs(e(genes)) for e in equations))
 
 
-def mutate(genes, sortedGeneset, window, geneIndexes):
-    indexes = random.sample(geneIndexes, random.randint(1, len(genes))) \
-        if random.randint(0, 10) == 0 else [random.choice(geneIndexes)]
+def mutate(genes, sorted_gene_set, window, gene_indexes):
+    indexes = random.sample(gene_indexes, random.randint(1, len(genes))) \
+        if random.randint(0, 10) == 0 else [random.choice(gene_indexes)]
     window.slide()
     while len(indexes) > 0:
         index = indexes.pop()
-        genesetIndex = sortedGeneset.index(genes[index])
-        start = max(0, genesetIndex - window.Size)
-        stop = min(len(sortedGeneset) - 1, genesetIndex + window.Size)
-        genesetIndex = random.randint(start, stop)
-        genes[index] = sortedGeneset[genesetIndex]
+        gene_set_index = sorted_gene_set.index(genes[index])
+        start = max(0, gene_set_index - window.Size)
+        stop = min(len(sorted_gene_set) - 1, gene_set_index + window.Size)
+        gene_set_index = random.randint(start, stop)
+        genes[index] = sorted_gene_set[gene_set_index]
 
 
 def display(candidate, startTime, fnGenesToInputs):
