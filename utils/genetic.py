@@ -166,6 +166,29 @@ def get_best(
             return improvement
 
 
+def hill_climbing(
+    optimizationFunction,
+    is_improvement,
+    is_optimal,
+    get_next_feature_value,
+    display,
+    initialFeatureValue,
+):
+    best = optimizationFunction(initialFeatureValue)
+    stdout = sys.stdout
+    sys.stdout = None
+    while not is_optimal(best):
+        featureValue = get_next_feature_value(best)
+        child = optimizationFunction(featureValue)
+        if is_improvement(best, child):
+            best = child
+            sys.stdout = stdout
+            display(best, featureValue)
+            sys.stdout = None
+    sys.stdout = stdout
+    return best
+
+
 class Strategies(Enum):
     Create = (0,)
     Mutate = (1,)
