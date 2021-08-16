@@ -23,8 +23,12 @@ class CardTests(unittest.TestCase):
 
         optimal_fitness = Fitness(36, 360, 0)
         best = genetic.get_best(
-            fn_get_fitness, 10, optimal_fitness,
-            gene_set, fn_display, custom_mutate=fnMutate
+            fn_get_fitness,
+            10,
+            optimal_fitness,
+            gene_set,
+            fn_display,
+            custom_mutate=fnMutate,
         )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
@@ -53,9 +57,7 @@ class Fitness:
 
     def __str__(self):
         return "sum: {0} prod: {1} dups: {2}".format(
-            self.Group1Sum,
-            self.Group2Product,
-            self.DuplicateCount
+            self.Group1Sum, self.Group2Product, self.DuplicateCount
         )
 
 
@@ -75,15 +77,17 @@ def mutate(genes, gene_set):
 def get_fitness(genes):
     group1Sum = sum(genes[0:5])
     group2Product = functools.reduce(operator.mul, genes[5:10])
-    duplicateCount = (len(genes) - len(set(genes)))
+    duplicateCount = len(genes) - len(set(genes))
     return Fitness(group1Sum, group2Product, duplicateCount)
 
 
 def display(candidate, start_time):
     time_diff = datetime.datetime.now() - start_time
-    print("{0} - {1}\t{2}\t{3}".format(
-        ', '.join(map(str, candidate.Genes[0:5])),
-        ', '.join(map(str, candidate.Genes[5:10])),
-        candidate.Fitness,
-        str(time_diff))
+    print(
+        "{0} - {1}\t{2}\t{3}".format(
+            ", ".join(map(str, candidate.Genes[0:5])),
+            ", ".join(map(str, candidate.Genes[5:10])),
+            candidate.Fitness,
+            str(time_diff),
+        )
     )

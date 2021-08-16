@@ -7,20 +7,22 @@ from genetic_algorithms.utils import genetic
 
 
 class KnapsackTests(unittest.TestCase):
-
     def test_cookies(self):
         items = [
-            Resource("Flour", 1680, 0.265, .41),
-            Resource("Butter", 1440, 0.5, .13),
-            Resource("Sugar", 1840, 0.441, .29)
+            Resource("Flour", 1680, 0.265, 0.41),
+            Resource("Butter", 1440, 0.5, 0.13),
+            Resource("Sugar", 1840, 0.441, 0.29),
         ]
         max_weight = 10
         max_volume = 4
 
         optimal = get_fitness(
-            [ItemQuantity(items[0], 1),
-             ItemQuantity(items[1], 14),
-             ItemQuantity(items[2], 6)])
+            [
+                ItemQuantity(items[0], 1),
+                ItemQuantity(items[1], 14),
+                ItemQuantity(items[2], 6),
+            ]
+        )
         self.fill_knapsack(items, max_weight, max_volume, optimal)
 
     def test_exnsd16(self):
@@ -48,8 +50,16 @@ class KnapsackTests(unittest.TestCase):
         def fnMutate(genes):
             mutate(genes, sorted_items, max_weight, max_volume, window)
 
-        best = genetic.get_best(fnGetFitness, None, optimal_fitness,
-                                None, fnDisplay, fnMutate, fnCreate, max_age=50)
+        best = genetic.get_best(
+            fnGetFitness,
+            None,
+            optimal_fitness,
+            None,
+            fnDisplay,
+            fnMutate,
+            fnCreate,
+            max_age=50,
+        )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
 
@@ -57,7 +67,7 @@ class Window:
     Min = None
     Max = None
     Size = None
-    
+
     def __init__(self, minimum, maximum, size):
         self.Min = minimum
         self.Max = maximum
@@ -107,17 +117,15 @@ class Fitness:
 
     def __str__(self):
         return "wt: {0:0.2f} vol: {1:0.2f} value: {2}".format(
-            self.total_weight,
-            self.total_volume,
-            self.total_value
+            self.total_weight, self.total_volume, self.total_value
         )
 
 
 def max_quantity(item, max_weight, max_volume):
-    return min(int(max_weight / item.Weight)
-               if item.Weight > 0 else sys.maxsize,
-               int(max_volume / item.Volume)
-               if item.Volume > 0 else sys.maxsize)
+    return min(
+        int(max_weight / item.Weight) if item.Weight > 0 else sys.maxsize,
+        int(max_volume / item.Volume) if item.Volume > 0 else sys.maxsize,
+    )
 
 
 def mutate(genes, items, max_weight, max_volume, window):
@@ -135,9 +143,9 @@ def mutate(genes, items, max_weight, max_volume, window):
         remaining_volume += item.Volume * iq.Quantity
         del genes[index]
 
-    adding = (remaining_weight > 0 or remaining_volume > 0) and \
-             (len(genes) == 0 or
-              (len(genes) < len(items) and random.randint(0, 100) == 0))
+    adding = (remaining_weight > 0 or remaining_volume > 0) and (
+        len(genes) == 0 or (len(genes) < len(items) and random.randint(0, 100) == 0)
+    )
     if adding:
         new_gene = add(genes, items, remaining_weight, remaining_volume)
         if new_gene is not None:
@@ -157,8 +165,9 @@ def mutate(genes, items, max_weight, max_volume, window):
         item = items[random.randint(start, stop)]
     max_qty = max_quantity(item, remaining_weight, remaining_volume)
     if max_qty > 0:
-        genes[index] = ItemQuantity(item, max_qty if (
-                window.Size > 1) else random.randint(1, max_qty))
+        genes[index] = ItemQuantity(
+            item, max_qty if (window.Size > 1) else random.randint(1, max_qty)
+        )
     else:
         del genes[index]
 
@@ -203,10 +212,10 @@ def display(candidate, start_time):
     descriptions = [str(iq.Quantity) + "x" + iq.Item.Name for iq in genes]
     if len(descriptions) == 0:
         descriptions.append("Empty")
-    print("{0}\t{1}\t{2}".format(
-        ', '.join(descriptions),
-        candidate.Fitness,
-        str(time_diff))
+    print(
+        "{0}\t{1}\t{2}".format(
+            ", ".join(descriptions), candidate.Fitness, str(time_diff)
+        )
     )
 
 
@@ -223,7 +232,7 @@ class KnapsackProblemData:
 
 
 def load_data(local_file_name):
-    with open(local_file_name, mode='r') as infile:
+    with open(local_file_name, mode="r") as infile:
         lines = infile.read().splitlines()
 
     data = KnapsackProblemData()
@@ -237,7 +246,7 @@ def load_data(local_file_name):
 
 
 def find_constraint(line, data):
-    parts = line.split(' ')
+    parts = line.split(" ")
     if parts[0] != "c:":
         return find_constraint
     data.max_weight = int(parts[1])
@@ -253,7 +262,7 @@ def find_data_start(line, data):
 def read_resource_or_find_data_end(line, data):
     if line == "end data":
         return find_solution_start
-    parts = line.split('\t')
+    parts = line.split("\t")
     resource = Resource(
         "R" + str(1 + len(data.Resources)), int(parts[1]), int(parts[0]), 0
     )
@@ -270,9 +279,10 @@ def find_solution_start(line, data):
 def read_solution_resource_or_find_solution_end(line, data):
     if line == "":
         return None
-    parts = [p for p in line.split('\t') if p != ""]
+    parts = [p for p in line.split("\t") if p != ""]
     resource_index = int(parts[0]) - 1  # make it 0 based
     resource_quantity = int(parts[1])
-    data.Solution.append(ItemQuantity(data.Resources[resource_index],
-                                      resource_quantity))
+    data.Solution.append(
+        ItemQuantity(data.Resources[resource_index], resource_quantity)
+    )
     return read_solution_resource_or_find_solution_end

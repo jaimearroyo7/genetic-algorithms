@@ -7,21 +7,21 @@ from genetic_algorithms.utils import genetic
 
 
 def load_data(localFileName):
-    """ expects:
+    """expects:
     HEADER section before DATA section, all lines start in column 0
     DATA section element all have space in column 0
     <space>1 23.45 67.89
     last line of file is: " EOF"
     """
-    with open(localFileName, mode='r') as infile:
+    with open(localFileName, mode="r") as infile:
         content = infile.read().splitlines()
     idToLocationLookup = {}
     for row in content:
-        if row[0] != ' ':  # HEADERS
+        if row[0] != " ":  # HEADERS
             continue
         if row == " EOF":
             break
-        id, x, y = row.split(' ')[1:4]
+        id, x, y = row.split(" ")[1:4]
         idToLocationLookup[int(id)] = [float(x), float(y)]
     return idToLocationLookup
 
@@ -32,23 +32,21 @@ class TravelingSalesmanTests(unittest.TestCase):
 
     def test_8_queens(self):
         idToLocationLookup = {
-            'A': [4, 7],
-            'B': [2, 6],
-            'C': [0, 5],
-            'D': [1, 3],
-            'E': [3, 0],
-            'F': [5, 1],
-            'G': [7, 2],
-            'H': [6, 4]
+            "A": [4, 7],
+            "B": [2, 6],
+            "C": [0, 5],
+            "D": [1, 3],
+            "E": [3, 0],
+            "F": [5, 1],
+            "G": [7, 2],
+            "H": [6, 4],
         }
-        optimalSequence = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+        optimalSequence = ["A", "B", "C", "D", "E", "F", "G", "H"]
         self.solve(idToLocationLookup, optimalSequence)
 
     def test_ulysses16(self):
         idToLocationLookup = load_data("ulysses16.tsp")
-        optimalSequence = [
-            14, 13, 12, 16, 1, 3, 2, 4, 8, 15, 5, 11, 9, 10, 7, 6
-        ]
+        optimalSequence = [14, 13, 12, 16, 1, 3, 2, 4, 8, 15, 5, 11, 9, 10, 7, 6]
         self.solve(idToLocationLookup, optimalSequence)
 
     def solve(self, idToLocationLookup, optimalSequence):
@@ -72,9 +70,16 @@ class TravelingSalesmanTests(unittest.TestCase):
         optimalFitness = fnGetFitness(optimalSequence)
         startTime = datetime.datetime.now()
         best = genetic.get_best(
-            fnGetFitness, None, optimalFitness, None,
-            fnDisplay, fnMutate, fnCreate, max_age=500, poolSize=25,
-            crossover=fnCrossover
+            fnGetFitness,
+            None,
+            optimalFitness,
+            None,
+            fnDisplay,
+            fnMutate,
+            fnCreate,
+            max_age=500,
+            poolSize=25,
+            crossover=fnCrossover,
         )
         self.assertTrue(not optimalFitness > best.Fitness)
 
@@ -111,7 +116,7 @@ def crossover(parentGenes, donorGenes, fnGetFitness):
         for i in range(len(parentGenes) - 1):
             if Pair(parentGenes[i], parentGenes[i + 1]) in pairs:
                 continue
-            tempGenes = parentGenes[i + 1:] + parentGenes[:i + 1]
+            tempGenes = parentGenes[i + 1 :] + parentGenes[: i + 1]
             found = True
             break
         if not found:
@@ -145,10 +150,7 @@ def crossover(parentGenes, donorGenes, fnGetFitness):
 
 
 def get_fitness(genes, idToLocationLookup):
-    fitness = get_distance(
-        idToLocationLookup[genes[0]],
-        idToLocationLookup[genes[-1]]
-    )
+    fitness = get_distance(idToLocationLookup[genes[0]], idToLocationLookup[genes[-1]])
     for i in range(len(genes) - 1):
         start = idToLocationLookup[genes[i]]
         end = idToLocationLookup[genes[i + 1]]
@@ -189,9 +191,11 @@ class Pair:
 
 def display(candidate, startTime):
     timeDiff = datetime.datetime.now() - startTime
-    print("{0}\t{1}\t{2}\t{3}".format(
-        ' '.join(map(str, candidate.Genes)),
-        candidate.Fitness,
-        candidate.Strategy.name,
-        str(timeDiff))
+    print(
+        "{0}\t{1}\t{2}\t{3}".format(
+            " ".join(map(str, candidate.Genes)),
+            candidate.Fitness,
+            candidate.Strategy.name,
+            str(timeDiff),
+        )
     )

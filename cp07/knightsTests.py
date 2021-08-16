@@ -39,31 +39,32 @@ class KnightsTests(unittest.TestCase):
         def fn_get_fitness(genes):
             return get_fitness(genes, boardWidth, boardHeight)
 
-        allPositions = [Position(x, y)
-                        for y in range(boardHeight)
-                        for x in range(boardWidth)]
+        allPositions = [
+            Position(x, y) for y in range(boardHeight) for x in range(boardWidth)
+        ]
 
         if boardWidth < 6 or boardHeight < 6:
             nonEdgePositions = allPositions
         else:
-            nonEdgePositions = [i for i in allPositions
-                                if 0 < i.X < boardWidth - 1 and
-                                0 < i.Y < boardHeight - 1]
+            nonEdgePositions = [
+                i
+                for i in allPositions
+                if 0 < i.X < boardWidth - 1 and 0 < i.Y < boardHeight - 1
+            ]
 
         def fnGetRandomPosition():
             return random.choice(nonEdgePositions)
 
         def fnMutate(genes):
-            mutate(
-                genes, boardWidth, boardHeight, allPositions, nonEdgePositions
-            )
+            mutate(genes, boardWidth, boardHeight, allPositions, nonEdgePositions)
 
         def fnCreate():
             return create(fnGetRandomPosition, expectedKnights)
 
         optimal_fitness = boardWidth * boardHeight
-        best = genetic.get_best(fn_get_fitness, None, optimal_fitness,
-                                None, fn_display, fnMutate, fnCreate)
+        best = genetic.get_best(
+            fn_get_fitness, None, optimal_fitness, None, fn_display, fnMutate, fnCreate
+        )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
 
@@ -87,10 +88,10 @@ class Position:
 
 class Board:
     def __init__(self, positions, width, height):
-        board = [['.'] * width for _ in range(height)]
+        board = [["."] * width for _ in range(height)]
         for index in range(len(positions)):
             knightPosition = positions[index]
-            board[knightPosition.Y][knightPosition.X] = 'N'
+            board[knightPosition.Y][knightPosition.X] = "N"
         self._board = board
         self._width = width
         self._height = height
@@ -98,8 +99,8 @@ class Board:
     def print(self):
         # 0,0 prints in bottom left corner
         for i in reversed(range(self._height)):
-            print(i, "\t", ' '.join(self._board[i]))
-        print(" \t", ' '.join(map(str, range(self._width))))
+            print(i, "\t", " ".join(self._board[i]))
+        print(" \t", " ".join(map(str, range(self._width))))
 
 
 def create(fnGetRandomPosition, expectedKnights):
@@ -127,24 +128,33 @@ def mutate(genes, boardWidth, boardHeight, allPositions, nonEdgePositions):
                 if p in knightIndexes:
                     knightIndexes.remove(p)
 
-        potentialKnightPositions = [
-            p for positions in
-            map(lambda x: get_attacks(x, boardWidth, boardHeight), unattacked)
-            for p in positions if p in nonEdgePositions]\
-            if len(unattacked) > 0 else nonEdgePositions
+        potentialKnightPositions = (
+            [
+                p
+                for positions in map(
+                    lambda x: get_attacks(x, boardWidth, boardHeight), unattacked
+                )
+                for p in positions
+                if p in nonEdgePositions
+            ]
+            if len(unattacked) > 0
+            else nonEdgePositions
+        )
 
-        geneIndex = random.randrange(0, len(genes)) \
-            if len(knightIndexes) == 0 \
+        geneIndex = (
+            random.randrange(0, len(genes))
+            if len(knightIndexes) == 0
             else random.choice([i for i in knightIndexes])
+        )
 
         position = random.choice(potentialKnightPositions)
         genes[geneIndex] = position
 
 
 def get_fitness(genes, boardWidth, boardHeight):
-    attacked = set(pos
-                   for kn in genes
-                   for pos in get_attacks(kn, boardWidth, boardHeight))
+    attacked = set(
+        pos for kn in genes for pos in get_attacks(kn, boardWidth, boardHeight)
+    )
     return len(attacked)
 
 
@@ -152,16 +162,21 @@ def display(candidate, start_time, boardWidth, boardHeight):
     time_diff = datetime.datetime.now() - start_time
     board = Board(candidate.Genes, boardWidth, boardHeight)
     board.print()
-    print("{0}\n\t{1}\t{2}".format(
-        ' '.join(map(str, candidate.Genes)),
-        candidate.Fitness,
-        str(time_diff))
+    print(
+        "{0}\n\t{1}\t{2}".format(
+            " ".join(map(str, candidate.Genes)), candidate.Fitness, str(time_diff)
+        )
     )
 
 
 def get_attacks(location, boardWidth, boardHeight):
-    return [i for i in set(
-        Position(x + location.X, y + location.Y)
-        for x in [-2, -1, 1, 2] if 0 <= x + location.X < boardWidth
-        for y in [-2, -1, 1, 2] if 0 <= y + location.Y < boardHeight
-        and abs(y) != abs(x))]
+    return [
+        i
+        for i in set(
+            Position(x + location.X, y + location.Y)
+            for x in [-2, -1, 1, 2]
+            if 0 <= x + location.X < boardWidth
+            for y in [-2, -1, 1, 2]
+            if 0 <= y + location.Y < boardHeight and abs(y) != abs(x)
+        )
+    ]

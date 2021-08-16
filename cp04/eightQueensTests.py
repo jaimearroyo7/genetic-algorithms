@@ -16,8 +16,9 @@ class EightQueensTests(unittest.TestCase):
             return get_fitness(genes, size)
 
         optimal_fitness = Fitness(0)
-        best = genetic.get_best(fn_get_fitness, 2 * size,
-                                optimal_fitness, gene_set, fn_display)
+        best = genetic.get_best(
+            fn_get_fitness, 2 * size, optimal_fitness, gene_set, fn_display
+        )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
     def test_benchmark(self):
@@ -26,11 +27,11 @@ class EightQueensTests(unittest.TestCase):
 
 class Board:
     def __init__(self, genes, size):
-        board = [['.'] * size for _ in range(size)]
+        board = [["."] * size for _ in range(size)]
         for index in range(0, len(genes), 2):
             row = genes[index]
             column = genes[index + 1]
-            board[column][row] = 'Q'
+            board[column][row] = "Q"
         self._board = board
 
     def get(self, row, column):
@@ -39,7 +40,7 @@ class Board:
     def print(self):
         # 0,0 prints in bottom left corner
         for i in reversed(range(0, len(self._board))):
-            print(' '.join(self._board[i]))
+            print(" ".join(self._board[i]))
 
 
 class Fitness:
@@ -63,16 +64,22 @@ def get_fitness(genes, size):
     south_east_diagonals_with_queens = set()
     for row in range(size):
         for col in range(size):
-            if board.get(row, col) == 'Q':
+            if board.get(row, col) == "Q":
                 rows_with_queens.add(row)
                 cols_with_queens.add(col)
                 north_east_diagonals_with_queens.add(row + col)
                 south_east_diagonals_with_queens.add(size - 1 - row + col)
 
-    total = size - len(rows_with_queens) \
-        + size - len(cols_with_queens) \
-        + size - len(north_east_diagonals_with_queens) \
-        + size - len(south_east_diagonals_with_queens)
+    total = (
+        size
+        - len(rows_with_queens)
+        + size
+        - len(cols_with_queens)
+        + size
+        - len(north_east_diagonals_with_queens)
+        + size
+        - len(south_east_diagonals_with_queens)
+    )
 
     return Fitness(total)
 
@@ -81,8 +88,8 @@ def display(candidate, start_time, size):
     time_diff = datetime.datetime.now() - start_time
     board = Board(candidate.Genes, size)
     board.print()
-    print("{0}\t- {1}\t{2}".format(
-        ' '.join(map(str, candidate.Genes)),
-        candidate.Fitness,
-        str(time_diff))
+    print(
+        "{0}\t- {1}\t{2}".format(
+            " ".join(map(str, candidate.Genes)), candidate.Fitness, str(time_diff)
+        )
     )

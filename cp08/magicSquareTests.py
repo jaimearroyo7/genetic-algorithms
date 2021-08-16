@@ -43,9 +43,16 @@ class MagicSquareTests(unittest.TestCase):
 
         optimal_value = Fitness(0)
         start_time = datetime.datetime.now()
-        best = genetic.get_best(fn_get_fitness, nSquared, optimal_value,
-                                gene_set, fn_display, fnMutate,
-                                fnCustomCreate, max_age)
+        best = genetic.get_best(
+            fn_get_fitness,
+            nSquared,
+            optimal_value,
+            gene_set,
+            fn_display,
+            fnMutate,
+            fnCustomCreate,
+            max_age,
+        )
 
         self.assertTrue(not optimal_value > best.Fitness)
 
@@ -69,13 +76,15 @@ def mutate(genes, indexes):
 
 
 def get_fitness(genes, diagonalSize, expectedSum):
-    rows, columns, northeastDiagonalSum, southeastDiagonalSum = \
-        get_sums(genes, diagonalSize)
+    rows, columns, northeastDiagonalSum, southeastDiagonalSum = get_sums(
+        genes, diagonalSize
+    )
 
-    sumOfDifferences = sum(int(abs(s - expectedSum))
-                           for s in rows + columns +
-                           [southeastDiagonalSum, northeastDiagonalSum]
-                           if s != expectedSum)
+    sumOfDifferences = sum(
+        int(abs(s - expectedSum))
+        for s in rows + columns + [southeastDiagonalSum, northeastDiagonalSum]
+        if s != expectedSum
+    )
 
     return Fitness(sumOfDifferences)
 
@@ -91,18 +100,17 @@ def get_sums(genes, diagonalSize):
             rows[row] += value
             columns[column] += value
         southeastDiagonalSum += genes[row * diagonalSize + row]
-        northeastDiagonalSum += genes[row * diagonalSize +
-                                      (diagonalSize - 1 - row)]
+        northeastDiagonalSum += genes[row * diagonalSize + (diagonalSize - 1 - row)]
     return rows, columns, northeastDiagonalSum, southeastDiagonalSum
 
 
 def display(candidate, diagonalSize, start_time):
     time_diff = datetime.datetime.now() - start_time
-    rows, columns, northeastDiagonalSum, southeastDiagonalSum = \
-    get_sums(candidate.Genes, diagonalSize)
+    rows, columns, northeastDiagonalSum, southeastDiagonalSum = get_sums(
+        candidate.Genes, diagonalSize
+    )
     for rowNumber in range(diagonalSize):
-        row = candidate.Genes[
-              rowNumber * diagonalSize:(rowNumber + 1) * diagonalSize]
+        row = candidate.Genes[rowNumber * diagonalSize : (rowNumber + 1) * diagonalSize]
         print("\t ", row, "=", rows[rowNumber])
     print(northeastDiagonalSum, "\t", columns, "\t", southeastDiagonalSum)
     print(" - - - - - - - - - - -", candidate.Fitness, str(time_diff))
