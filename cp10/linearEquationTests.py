@@ -7,34 +7,34 @@ from genetic_algorithms.utils import genetic
 
 
 class LinearEquationTests(unittest.TestCase):
-    def solve_unknowns(self, numUnknowns, gene_set, equations, fnGenesToInputs):
-        startTime = datetime.datetime.now()
+    def solve_unknowns(self, num_unknowns, gene_set, equations, fn_genes_to_inputs):
+        start_time = datetime.datetime.now()
         max_age = 50
         window = Window(
             max(1, int(len(gene_set) / (2 * max_age))),
             max(1, int(len(gene_set) / 3)),
             int(len(gene_set) / 2),
         )
-        gene_indexes = [i for i in range(numUnknowns)]
+        gene_indexes = [i for i in range(num_unknowns)]
         sorted_gene_set = sorted(gene_set)
 
-        def fnMutate(genes):
+        def fn_mutate(genes):
             mutate(genes, sorted_gene_set, window, gene_indexes)
 
-        def fnDisplay(candidate):
-            display(candidate, startTime, fnGenesToInputs)
+        def fn_display(candidate):
+            display(candidate, start_time, fn_genes_to_inputs)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, equations)
 
         optimal_fitness = Fitness(0)
         best = genetic.get_best(
-            fnGetFitness,
-            numUnknowns,
+            fn_get_fitness,
+            num_unknowns,
             optimal_fitness,
             gene_set,
-            fnDisplay,
-            fnMutate,
+            fn_display,
+            fn_mutate,
             max_age=50,
         )
         self.assertTrue(not optimal_fitness > best.Fitness)
@@ -42,19 +42,19 @@ class LinearEquationTests(unittest.TestCase):
     def test_2_unknowns(self):
         gene_set = [i for i in range(-5, 5) if i != 0]
 
-        def fnGenesToInputs(genes):
+        def fn_genes_to_inputs(genes):
             return genes[0], genes[1]
 
         def e1(genes):
-            x, y = fnGenesToInputs(genes)
+            x, y = fn_genes_to_inputs(genes)
             return x + 2 * y - 4
 
         def e2(genes):
-            x, y = fnGenesToInputs(genes)
+            x, y = fn_genes_to_inputs(genes)
             return 4 * x + 4 * y - 12
 
         equations = [e1, e2]
-        self.solve_unknowns(2, gene_set, equations, fnGenesToInputs)
+        self.solve_unknowns(2, gene_set, equations, fn_genes_to_inputs)
 
     def test_3_unknowns(self):
         gene_range = [i for i in range(-5, 5) if i != 0]
@@ -68,7 +68,7 @@ class LinearEquationTests(unittest.TestCase):
             )
         ]
 
-        def fnGenesToInputs(genes):
+        def fn_genes_to_inputs(genes):
             return genes
 
         def e1(genes):
@@ -84,7 +84,7 @@ class LinearEquationTests(unittest.TestCase):
             return 2 * z * fractions.Fraction(6, x) + 3 * fractions.Fraction(y, 2) - 6
 
         equations = [e1, e2, e3]
-        self.solve_unknowns(3, gene_set, equations, fnGenesToInputs)
+        self.solve_unknowns(3, gene_set, equations, fn_genes_to_inputs)
 
     def test_4_unknowns(self):
         gene_range = [i for i in range(-13, 13) if i != 0]
@@ -98,7 +98,7 @@ class LinearEquationTests(unittest.TestCase):
             )
         ]
 
-        def fnGenesToInputs(genes):
+        def fn_genes_to_inputs(genes):
             return genes
 
         def e1(genes):
@@ -142,7 +142,7 @@ class LinearEquationTests(unittest.TestCase):
             )
 
         equations = [e1, e2, e3, e4]
-        self.solve_unknowns(4, gene_set, equations, fnGenesToInputs)
+        self.solve_unknowns(4, gene_set, equations, fn_genes_to_inputs)
 
     def test_benchmark(self):
         genetic.Benchmark.run(lambda: self.test_4_unknowns())
@@ -168,21 +168,21 @@ def mutate(genes, sorted_gene_set, window, gene_indexes):
         genes[index] = sorted_gene_set[gene_set_index]
 
 
-def display(candidate, startTime, fnGenesToInputs):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time, fn_genes_to_inputs):
+    time_diff = datetime.datetime.now() - start_time
     symbols = "xyza"
     result = ", ".join(
         "{0} = {1}".format(s, v)
-        for s, v in zip(symbols, fnGenesToInputs(candidate.Genes))
+        for s, v in zip(symbols, fn_genes_to_inputs(candidate.Genes))
     )
-    print("{0}\t{1}\t{2}".format(result, candidate.Fitness, str(timeDiff)))
+    print("{0}\t{1}\t{2}".format(result, candidate.Fitness, str(time_diff)))
 
 
 class Fitness:
     TotalDifference = None
 
-    def __init__(self, totalDifference):
-        self.TotalDifference = totalDifference
+    def __init__(self, total_difference):
+        self.TotalDifference = total_difference
 
     def __gt__(self, other):
         return self.TotalDifference < other.TotalDifference

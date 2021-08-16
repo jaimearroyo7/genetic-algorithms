@@ -38,26 +38,26 @@ class KnapsackTests(unittest.TestCase):
         window = Window(1, max(1, int(len(items) / 3)), int(len(items) / 2))
         sorted_items = sorted(items, key=lambda item: item.Value)
 
-        def fnDisplay(candidate):
+        def fn_display(candidate):
             display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes)
 
-        def fnCreate():
+        def fn_create():
             return create(items, max_weight, max_volume)
 
-        def fnMutate(genes):
+        def fn_mutate(genes):
             mutate(genes, sorted_items, max_weight, max_volume, window)
 
         best = genetic.get_best(
-            fnGetFitness,
+            fn_get_fitness,
             None,
             optimal_fitness,
             None,
-            fnDisplay,
-            fnMutate,
-            fnCreate,
+            fn_display,
+            fn_mutate,
+            fn_create,
             max_age=50,
         )
         self.assertTrue(not optimal_fitness > best.Fitness)
@@ -253,7 +253,7 @@ def find_constraint(line, data):
     return find_data_start
 
 
-def find_data_start(line, data):
+def find_data_start(line, _):
     if line != "begin data":
         return find_data_start
     return read_resource_or_find_data_end
@@ -270,7 +270,7 @@ def read_resource_or_find_data_end(line, data):
     return read_resource_or_find_data_end
 
 
-def find_solution_start(line, data):
+def find_solution_start(line, _):
     if line == "sol:":
         return read_solution_resource_or_find_solution_end
     return find_solution_start

@@ -18,7 +18,7 @@ class CardTests(unittest.TestCase):
         def fn_get_fitness(genes):
             return get_fitness(genes)
 
-        def fnMutate(genes):
+        def fn_mutate(genes):
             mutate(genes, gene_set)
 
         optimal_fitness = Fitness(36, 360, 0)
@@ -28,7 +28,7 @@ class CardTests(unittest.TestCase):
             optimal_fitness,
             gene_set,
             fn_display,
-            custom_mutate=fnMutate,
+            custom_mutate=fn_mutate,
         )
         self.assertTrue(not optimal_fitness > best.Fitness)
 
@@ -42,13 +42,13 @@ class Fitness:
     TotalDifference = None
     DuplicateCount = None
 
-    def __init__(self, group1Sum, group2Product, duplicateCount):
-        self.Group1Sum = group1Sum
-        self.Group2Product = group2Product
-        sumDifference = abs(36 - group1Sum)
-        productDifference = abs(360 - group2Product)
-        self.TotalDifference = sumDifference + productDifference
-        self.DuplicateCount = duplicateCount
+    def __init__(self, group_1_sum, group_2_product, duplicate_count):
+        self.Group1Sum = group_1_sum
+        self.Group2Product = group_2_product
+        sum_difference = abs(36 - group_1_sum)
+        product_difference = abs(360 - group_2_product)
+        self.TotalDifference = sum_difference + product_difference
+        self.DuplicateCount = duplicate_count
 
     def __gt__(self, other):
         if self.DuplicateCount != other.DuplicateCount:
@@ -66,19 +66,19 @@ def mutate(genes, gene_set):
         count = random.randint(1, 4)
         while count > 0:
             count -= 1
-            indexA, indexB = random.sample(range(len(genes)), 2)
-            genes[indexA], genes[indexB] = genes[indexB], genes[indexA]
+            index_a, index_b = random.sample(range(len(genes)), 2)
+            genes[index_a], genes[index_b] = genes[index_b], genes[index_a]
     else:
-        indexA = random.randrange(0, len(genes))
-        indexB = random.randrange(0, len(gene_set))
-        genes[indexA] = gene_set[indexB]
+        index_a = random.randrange(0, len(genes))
+        index_b = random.randrange(0, len(gene_set))
+        genes[index_a] = gene_set[index_b]
 
 
 def get_fitness(genes):
-    group1Sum = sum(genes[0:5])
-    group2Product = functools.reduce(operator.mul, genes[5:10])
-    duplicateCount = len(genes) - len(set(genes))
-    return Fitness(group1Sum, group2Product, duplicateCount)
+    group_1_sum = sum(genes[0:5])
+    group_2_product = functools.reduce(operator.mul, genes[5:10])
+    duplicate_count = len(genes) - len(set(genes))
+    return Fitness(group_1_sum, group_2_product, duplicate_count)
 
 
 def display(candidate, start_time):

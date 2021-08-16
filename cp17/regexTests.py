@@ -101,21 +101,21 @@ def get_fitness(genes, wanted, unwanted):
             regexErrorsSeen[key] = info
         return Fitness(0, len(wanted), len(unwanted), length)
 
-    numWantedMatched = sum(1 for i in wanted if re.fullmatch(pattern, i))
-    numUnwantedMatched = sum(1 for i in unwanted if re.fullmatch(pattern, i))
-    return Fitness(numWantedMatched, len(wanted), numUnwantedMatched, length)
+    num_wanted_matched = sum(1 for i in wanted if re.fullmatch(pattern, i))
+    num_unwanted_matched = sum(1 for i in unwanted if re.fullmatch(pattern, i))
+    return Fitness(num_wanted_matched, len(wanted), num_unwanted_matched, length)
 
 
-def display(candidate, startTime):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time):
+    time_diff = datetime.datetime.now() - start_time
     print(
-        "{}\t{}\t{}".format(repair_regex(candidate.Genes), candidate.Fitness, timeDiff)
+        "{}\t{}\t{}".format(repair_regex(candidate.Genes), candidate.Fitness, time_diff)
     )
 
 
-def mutate_add(genes, geneset):
+def mutate_add(genes, gene_set):
     index = random.randrange(0, len(genes) + 1) if len(genes) > 0 else 0
-    genes[index:index] = [random.choice(geneset)]
+    genes[index:index] = [random.choice(gene_set)]
     return True
 
 
@@ -128,19 +128,19 @@ def mutate_remove(genes):
     return True
 
 
-def mutate_replace(genes, geneset):
+def mutate_replace(genes, gene_set):
     if len(genes) < 1:
         return False
     index = random.randrange(0, len(genes))
-    genes[index] = random.choice(geneset)
+    genes[index] = random.choice(gene_set)
     return True
 
 
 def mutate_swap(genes):
     if len(genes) < 2:
         return False
-    indexA, indexB = random.sample(range(len(genes)), 2)
-    genes[indexA], genes[indexB] = genes[indexB], genes[indexA]
+    index_a, index_b = random.sample(range(len(genes)), 2)
+    genes[index_a], genes[index_b] = genes[index_b], genes[index_a]
     return True
 
 
@@ -149,12 +149,12 @@ def mutate_move(genes):
         return False
     start = random.choice(range(len(genes)))
     stop = start + random.randint(1, 2)
-    toMove = genes[start:stop]
+    to_move = genes[start:stop]
     genes[start:stop] = []
     index = random.choice(range(len(genes)))
     if index >= start:
         index += 1
-    genes[index:index] = toMove
+    genes[index:index] = to_move
     return True
 
 
@@ -173,15 +173,15 @@ def mutate_to_character_set(genes):
     shorter = [
         i
         for i in ors
-        if sum(len(w) for w in genes[i - 1 : i + 2 : 2])
-        > len(set(c for w in genes[i - 1 : i + 2 : 2] for c in w))
+        if sum(len(w) for w in genes[i - 1: i + 2: 2])
+        > len(set(c for w in genes[i - 1: i + 2: 2] for c in w))
     ]
     if len(shorter) == 0:
         return False
     index = random.choice(ors)
-    distinct = set(c for w in genes[index - 1 : index + 2 : 2] for c in w)
+    distinct = set(c for w in genes[index - 1: index + 2: 2] for c in w)
     sequence = ["["] + [i for i in distinct] + ["]"]
-    genes[index - 1 : index + 2] = sequence
+    genes[index - 1: index + 2] = sequence
     return True
 
 
@@ -205,13 +205,13 @@ def mutate_to_character_set_left(genes, wanted):
     if len(min2) == 0:
         return False
     choice = random.choice(min2)
-    characterSet = ["|", genes[choice[0] + 1][0], "["]
-    characterSet.extend([genes[i + 1][1] for i in choice])
-    characterSet.append("]")
+    character_set = ["|", genes[choice[0] + 1][0], "["]
+    character_set.extend([genes[i + 1][1] for i in choice])
+    character_set.append("]")
     for i in reversed(choice):
         if i >= 0:
-            genes[i : i + 2] = []
-    genes.extend(characterSet)
+            genes[i: i + 2] = []
+    genes.extend(character_set)
     return True
 
 
@@ -221,17 +221,17 @@ def mutate_add_wanted(genes, wanted):
     return True
 
 
-def mutate(genes, fnGetFitness, mutationOperators, mutationRoundCounts):
-    initialFitness = fnGetFitness(genes)
-    count = random.choice(mutationRoundCounts)
+def mutate(genes, fn_get_fitness, mutation_operators, mutation_round_counts):
+    initial_fitness = fn_get_fitness(genes)
+    count = random.choice(mutation_round_counts)
     for i in range(1, count + 2):
-        copy = mutationOperators[:]
+        copy = mutation_operators[:]
         func = random.choice(copy)
         while not func(genes):
             copy.remove(func)
             func = random.choice(copy)
-        if fnGetFitness(genes) > initialFitness:
-            mutationRoundCounts.append(i)
+        if fn_get_fitness(genes) > initial_fitness:
+            mutation_round_counts.append(i)
             return
 
 
@@ -252,10 +252,10 @@ class RegexTests(unittest.TestCase):
         unwanted = {
             "N" + l for l in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" if "N" + l not in wanted
         }
-        customOperators = [
+        custom_operators = [
             partial(mutate_to_character_set_left, wanted=wanted),
         ]
-        self.find_regex(wanted, unwanted, 11, customOperators)
+        self.find_regex(wanted, unwanted, 11, custom_operators)
 
     def test_even_length(self):
         wanted = {
@@ -293,10 +293,10 @@ class RegexTests(unittest.TestCase):
             "111",
             "",
         }
-        customOperators = [
+        custom_operators = [
             mutate_to_character_set,
         ]
-        self.find_regex(wanted, unwanted, 10, customOperators)
+        self.find_regex(wanted, unwanted, 10, custom_operators)
 
     def test_50_state_codes(self):
         Fitness.UseRegexLength = True
@@ -358,51 +358,51 @@ class RegexTests(unittest.TestCase):
             for b in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if a + b not in wanted
         } | set(i for i in "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-        customOperators = [
+        custom_operators = [
             partial(mutate_to_character_set_left, wanted=wanted),
             mutate_to_character_set,
             partial(mutate_add_wanted, wanted=[i for i in wanted]),
         ]
-        self.find_regex(wanted, unwanted, 120, customOperators)
+        self.find_regex(wanted, unwanted, 120, custom_operators)
 
-    def find_regex(self, wanted, unwanted, expectedLength, customOperators=None):
-        startTime = datetime.datetime.now()
-        textGenes = wanted | set(c for w in wanted for c in w)
-        fullGeneset = [i for i in allMetas | textGenes]
+    def find_regex(self, wanted, unwanted, expected_length, custom_operators=None):
+        start_time = datetime.datetime.now()
+        text_genes = wanted | set(c for w in wanted for c in w)
+        full_gene_set = [i for i in allMetas | text_genes]
 
-        def fnDisplay(candidate):
-            display(candidate, startTime)
+        def fn_display(candidate):
+            display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, wanted, unwanted)
 
-        mutationRoundCounts = [1]
+        mutation_round_counts = [1]
 
-        mutationOperators = [
-            partial(mutate_add, geneset=fullGeneset),
-            partial(mutate_replace, geneset=fullGeneset),
+        mutation_operators = [
+            partial(mutate_add, gene_set=full_gene_set),
+            partial(mutate_replace, gene_set=full_gene_set),
             mutate_remove,
             mutate_swap,
             mutate_move,
         ]
-        if customOperators is not None:
-            mutationOperators.extend(customOperators)
+        if custom_operators is not None:
+            mutation_operators.extend(custom_operators)
 
-        def fnMutate(genes):
-            mutate(genes, fnGetFitness, mutationOperators, mutationRoundCounts)
+        def fn_mutate(genes):
+            mutate(genes, fn_get_fitness, mutation_operators, mutation_round_counts)
 
-        optimalFitness = Fitness(len(wanted), len(wanted), 0, expectedLength)
+        optimal_fitness = Fitness(len(wanted), len(wanted), 0, expected_length)
 
         best = genetic.get_best(
-            fnGetFitness,
-            max(len(i) for i in textGenes),
-            optimalFitness,
-            fullGeneset,
-            fnDisplay,
-            fnMutate,
+            fn_get_fitness,
+            max(len(i) for i in text_genes),
+            optimal_fitness,
+            full_gene_set,
+            fn_display,
+            fn_mutate,
             poolSize=10,
         )
-        self.assertTrue(not optimalFitness > best.Fitness)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
         for info in regexErrorsSeen.values():
             print("")
@@ -417,22 +417,22 @@ class RegexTests(unittest.TestCase):
 class Fitness:
     UseRegexLength = False
 
-    def __init__(self, numWantedMatched, totalWanted, numUnwantedMatched, length):
-        self.NumWantedMatched = numWantedMatched
-        self._totalWanted = totalWanted
-        self.NumUnwantedMatched = numUnwantedMatched
+    def __init__(self, num_wanted_matched, total_wanted, num_unwanted_matched, length):
+        self.NumWantedMatched = num_wanted_matched
+        self.TotalWanted = total_wanted
+        self.NumUnwantedMatched = num_unwanted_matched
         self.Length = length
 
     def __gt__(self, other):
-        combined = (self._totalWanted - self.NumWantedMatched) + self.NumUnwantedMatched
-        otherCombined = (
-            other._totalWanted - other.NumWantedMatched
+        combined = (self.TotalWanted - self.NumWantedMatched) + self.NumUnwantedMatched
+        other_combined = (
+            other.TotalWanted - other.NumWantedMatched
         ) + other.NumUnwantedMatched
-        if combined != otherCombined:
-            return combined < otherCombined
+        if combined != other_combined:
+            return combined < other_combined
         success = combined == 0
-        otherSuccess = otherCombined == 0
-        if success != otherSuccess:
+        other_success = other_combined == 0
+        if success != other_success:
             return success
         if not success:
             return self.Length <= other.Length if Fitness.UseRegexLength else False
@@ -441,7 +441,7 @@ class Fitness:
     def __str__(self):
         return "matches: {} wanted, {} unwanted, len {}".format(
             "all"
-            if self._totalWanted == self.NumWantedMatched
+            if self.TotalWanted == self.NumWantedMatched
             else self.NumWantedMatched,
             self.NumUnwantedMatched,
             self.Length,

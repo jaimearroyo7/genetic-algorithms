@@ -9,48 +9,50 @@ from genetic_algorithms.utils import genetic
 
 def get_fitness(genes, rules, inputs):
     circuit = nodes_to_circuit(genes)[0]
-    sourceLabels = "ABCD"
-    rulesPassed = 0
+    source_labels = "ABCD"
+    rules_passed = 0
     for rule in rules:
         inputs.clear()
-        inputs.update(zip(sourceLabels, rule[0]))
+        inputs.update(zip(source_labels, rule[0]))
         if circuit.get_output() == rule[1]:
-            rulesPassed += 1
-    return rulesPassed
+            rules_passed += 1
+    return rules_passed
 
 
-def display(candidate, startTime):
+def display(candidate, start_time):
     circuit = nodes_to_circuit(candidate.Genes)[0]
-    timeDiff = datetime.datetime.now() - startTime
-    print("{}\t{}\t{}".format(circuit, candidate.Fitness, timeDiff))
+    time_diff = datetime.datetime.now() - start_time
+    print("{}\t{}\t{}".format(circuit, candidate.Fitness, time_diff))
 
 
 def create_gene(index, gates, sources):
     if index < len(sources):
-        gateType = sources[index]
+        gate_type = sources[index]
     else:
-        gateType = random.choice(gates)
-    indexA = indexB = None
-    if gateType[1].input_count() > 0:
-        indexA = random.randint(0, index)
-    if gateType[1].input_count() > 1:
-        indexB = random.randint(0, index)
-        if indexB == indexA:
-            indexB = random.randint(0, index)
-    return Node(gateType[0], indexA, indexB)
+        gate_type = random.choice(gates)
+    index_a = index_b = None
+    if gate_type[1].input_count() > 0:
+        index_a = random.randint(0, index)
+    if gate_type[1].input_count() > 1:
+        index_b = random.randint(0, index)
+        if index_b == index_a:
+            index_b = random.randint(0, index)
+    return Node(gate_type[0], index_a, index_b)
 
 
-def mutate(childGenes, fnCreateGene, fnGetFitness, sourceCount):
+def mutate(child_genes, fn_create_gene, fn_get_fitness, source_count):
     count = random.randint(1, 5)
-    initialFitness = fnGetFitness(childGenes)
+    initial_fitness = fn_get_fitness(child_genes)
     while count > 0:
         count -= 1
-        indexesUsed = [i for i in nodes_to_circuit(childGenes)[1] if i >= sourceCount]
-        if len(indexesUsed) == 0:
+        indexes_used = [
+            i for i in nodes_to_circuit(child_genes)[1] if i >= source_count
+        ]
+        if len(indexes_used) == 0:
             return
-        index = random.choice(indexesUsed)
-        childGenes[index] = fnCreateGene(index)
-        if fnGetFitness(childGenes) > initialFitness:
+        index = random.choice(indexes_used)
+        child_genes[index] = fn_create_gene(index)
+        if fn_get_fitness(child_genes) > initial_fitness:
             return
 
 
@@ -75,8 +77,8 @@ class CircuitTests(unittest.TestCase):
             [[True, True], True],
         ]
 
-        optimalLength = 6
-        self.find_circuit(rules, optimalLength)
+        optimal_length = 6
+        self.find_circuit(rules, optimal_length)
 
     def test_generate_XOR(self):
         rules = [
@@ -123,7 +125,7 @@ class CircuitTests(unittest.TestCase):
             [[1, 1, 1, 0], [1, 0, 1]],  # 3 + 2 = 5
             [[1, 1, 1, 1], [1, 1, 0]],
         ]  # 3 + 3 = 6
-        bitNRules = [[rule[0], rule[1][2 - bit]] for rule in rules]
+        bit_n_rules = [[rule[0], rule[1][2 - bit]] for rule in rules]
         self.gates.append([circuits.Or, circuits.Or])
         self.gates.append([circuits.Xor, circuits.Xor])
         self.sources.append(
@@ -132,7 +134,7 @@ class CircuitTests(unittest.TestCase):
         self.sources.append(
             [lambda l, r: circuits.Source("D", self.inputs), circuits.Source]
         )
-        return bitNRules
+        return bit_n_rules
 
     def test_2_bit_adder_1s_bit(self):
         rules = self.get_2_bit_adder_rules_for_bit(0)
@@ -146,91 +148,91 @@ class CircuitTests(unittest.TestCase):
         rules = self.get_2_bit_adder_rules_for_bit(2)
         self.find_circuit(rules, 9)
 
-    def find_circuit(self, rules, expectedLength):
-        startTime = datetime.datetime.now()
+    def find_circuit(self, rules, expected_length):
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate, length=None):
+        def fn_display(candidate, length=None):
             if length is not None:
                 print(
                     "-- distinct nodes in circuit:",
                     len(nodes_to_circuit(candidate.Genes)[1]),
                 )
-            display(candidate, startTime)
+            display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, rules, self.inputs)
 
-        def fnCreateGene(index):
+        def fn_create_gene(index):
             return create_gene(index, self.gates, self.sources)
 
-        def fnMutate(genes):
-            mutate(genes, fnCreateGene, fnGetFitness, len(self.sources))
+        def fn_mutate(genes):
+            mutate(genes, fn_create_gene, fn_get_fitness, len(self.sources))
 
-        maxLength = 50
+        max_length = 50
 
-        def fnCreate():
-            return [fnCreateGene(i) for i in range(maxLength)]
+        def fn_create():
+            return [fn_create_gene(i) for i in range(max_length)]
 
-        def fnOptimizationFunction(variableLength):
-            nonlocal maxLength
-            maxLength = variableLength
+        def fn_optimization_function(variable_length):
+            nonlocal max_length
+            max_length = variable_length
             return genetic.get_best(
-                fnGetFitness,
+                fn_get_fitness,
                 None,
                 len(rules),
                 None,
-                fnDisplay,
-                fnMutate,
-                fnCreate,
+                fn_display,
+                fn_mutate,
+                fn_create,
                 poolSize=3,
-                maxSeconds=30,
+                max_seconds=30,
             )
 
-        def fnIsImprovement(currentBest, child):
+        def fn_is_improvement(current_best, child):
             return child.Fitness == len(rules) and len(
                 nodes_to_circuit(child.Genes)[1]
-            ) < len(nodes_to_circuit(currentBest.Genes)[1])
+            ) < len(nodes_to_circuit(current_best.Genes)[1])
 
-        def fnIsOptimal(child):
+        def fn_is_optimal(child):
             return (
                 child.Fitness == len(rules)
-                and len(nodes_to_circuit(child.Genes)[1]) <= expectedLength
+                and len(nodes_to_circuit(child.Genes)[1]) <= expected_length
             )
 
-        def fnGetNextFeatureValue(currentBest):
-            return len(nodes_to_circuit(currentBest.Genes)[1])
+        def fn_get_next_feature_value(current_best):
+            return len(nodes_to_circuit(current_best.Genes)[1])
 
         best = genetic.hill_climbing(
-            fnOptimizationFunction,
-            fnIsImprovement,
-            fnIsOptimal,
-            fnGetNextFeatureValue,
-            fnDisplay,
-            maxLength,
+            fn_optimization_function,
+            fn_is_improvement,
+            fn_is_optimal,
+            fn_get_next_feature_value,
+            fn_display,
+            max_length,
         )
         self.assertTrue(best.Fitness == len(rules))
-        self.assertFalse(len(nodes_to_circuit(best.Genes)[1]) > expectedLength)
+        self.assertFalse(len(nodes_to_circuit(best.Genes)[1]) > expected_length)
 
 
 def nodes_to_circuit(genes):
     circuit = []
-    usedIndexes = []
+    used_indexes = []
     for i, node in enumerate(genes):
         used = {i}
-        inputA = inputB = None
-        if node.IndexA is not None and i > node.IndexA:
-            inputA = circuit[node.IndexA]
-            used.update(usedIndexes[node.IndexA])
-            if node.IndexB is not None and i > node.IndexB:
-                inputB = circuit[node.IndexB]
-                used.update(usedIndexes[node.IndexB])
-        circuit.append(node.CreateGate(inputA, inputB))
-        usedIndexes.append(used)
-    return circuit[-1], usedIndexes[-1]
+        input_a = input_b = None
+        if node.index_a is not None and i > node.index_a:
+            input_a = circuit[node.index_a]
+            used.update(used_indexes[node.index_a])
+            if node.index_b is not None and i > node.index_b:
+                input_b = circuit[node.index_b]
+                used.update(used_indexes[node.index_b])
+        circuit.append(node.CreateGate(input_a, input_b))
+        used_indexes.append(used)
+    return circuit[-1], used_indexes[-1]
 
 
 class Node:
-    def __init__(self, createGate, indexA=None, indexB=None):
-        self.CreateGate = createGate
-        self.IndexA = indexA
-        self.IndexB = indexB
+    def __init__(self, create_gate, index_a=None, index_b=None):
+        self.CreateGate = create_gate
+        self.index_a = index_a
+        self.index_b = index_b

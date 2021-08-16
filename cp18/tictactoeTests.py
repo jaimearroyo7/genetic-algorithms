@@ -7,8 +7,8 @@ from genetic_algorithms.utils import genetic
 
 
 def get_fitness(genes):
-    localCopy = genes[:]
-    fitness = get_fitness_for_games(localCopy)
+    local_copy = genes[:]
+    fitness = get_fitness_for_games(local_copy)
     fitness.GeneCount = len(genes)
     return fitness
 
@@ -16,85 +16,112 @@ def get_fitness(genes):
 squareIndexes = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 
-def play1on1(xGenes, oGenes):
+def play1on1(x_genes, _genes):
     board = dict((i, Square(i, ContentType.Empty)) for i in range(1, 9 + 1))
     empties = [v for v in board.values() if v.Content == ContentType.Empty]
-    roundData = [[xGenes, ContentType.Mine, genetic.CompetitionResult.Loss,
-                  genetic.CompetitionResult.Win],
-                 [oGenes, ContentType.Opponent, genetic.CompetitionResult.Win,
-                  genetic.CompetitionResult.Loss]]
-    playerIndex = 0
+    round_data = [
+        [
+            x_genes,
+            ContentType.Mine,
+            genetic.CompetitionResult.Loss,
+            genetic.CompetitionResult.Win,
+        ],
+        [
+            _genes,
+            ContentType.Opponent,
+            genetic.CompetitionResult.Win,
+            genetic.CompetitionResult.Loss,
+        ],
+    ]
+    player_index = 0
 
     while len(empties) > 0:
-        playerData = roundData[playerIndex]
-        playerIndex = 1 - playerIndex
-        genes, piece, lossResult, winResult = playerData
+        player_data = round_data[player_index]
+        player_index = 1 - player_index
+        genes, piece, loss_result, win_result = player_data
 
-        moveAndRuleIndex = get_move(genes, board, empties)
-        if moveAndRuleIndex is None:  # could not find a move
-            return lossResult
+        move_and_rule_index = get_move(genes, board, empties)
+        if move_and_rule_index is None:  # could not find a move
+            return loss_result
 
-        index = moveAndRuleIndex[0]
+        index = move_and_rule_index[0]
         board[index] = Square(index, piece)
 
-        mostRecentMoveOnly = [board[index]]
-        if len(RowContentFilter(piece, 3).get_matches(board, mostRecentMoveOnly)) > 0 or \
-           len(ColumnContentFilter(piece, 3).get_matches(board, mostRecentMoveOnly)) > 0 or \
-           len(DiagonalContentFilter(piece, 3).get_matches(board, mostRecentMoveOnly)) > 0:
-            return winResult
+        most_recent_move_only = [board[index]]
+        if (
+            len(RowContentFilter(piece, 3).get_matches(
+                board, most_recent_move_only)) > 0
+            or len(ColumnContentFilter(piece, 3).get_matches(
+                board, most_recent_move_only))
+            > 0
+            or len(
+                DiagonalContentFilter(piece, 3).get_matches(
+                    board, most_recent_move_only)
+            )
+            > 0
+        ):
+            return win_result
         empties = [v for v in board.values() if v.Content == ContentType.Empty]
     return genetic.CompetitionResult.Tie
 
 
 def get_fitness_for_games(genes):
-    def getBoardString(b):
-        return ''.join(map(lambda i:
-                           '.' if b[i].Content == ContentType.Empty
-                           else 'x' if b[i].Content == ContentType.Mine
-                           else 'o', squareIndexes))
+    def get_board_string(b):
+        return "".join(
+            map(
+                lambda i: "."
+                if b[i].Content == ContentType.Empty
+                else "x"
+                if b[i].Content == ContentType.Mine
+                else "o",
+                squareIndexes,
+            )
+        )
 
     board = dict((i, Square(i, ContentType.Empty)) for i in range(1, 9 + 1))
 
     queue = [board]
     for square in board.values():
-        candiateCopy = board.copy()
-        candiateCopy[square.Index] = Square(square.Index, ContentType.Opponent)
-        queue.append(candiateCopy)
+        candidate_copy = board.copy()
+        candidate_copy[square.Index] = Square(square.Index, ContentType.Opponent)
+        queue.append(candidate_copy)
 
-    winningRules = {}
+    winning_rules = {}
     wins = ties = losses = 0
 
     while len(queue) > 0:
         board = queue.pop()
-        boardString = getBoardString(board)
+        board_string = get_board_string(board)
         empties = [v for v in board.values() if v.Content == ContentType.Empty]
 
         if len(empties) == 0:
             ties += 1
             continue
 
-        candidateIndexAndRuleIndex = get_move(genes, board, empties)
+        candidate_index_and_rule_index = get_move(genes, board, empties)
 
-        if candidateIndexAndRuleIndex is None:  # could not find a move
+        if candidate_index_and_rule_index is None:  # could not find a move
             # there are empties but didn't find a move
             losses += 1
             # go to next board
             continue
 
         # found at least one move
-        index = candidateIndexAndRuleIndex[0]
+        index = candidate_index_and_rule_index[0]
         board[index] = Square(index, ContentType.Mine)
-        # newBoardString = getBoardString(board)
+        # newBoardString = get_board_string(board)
 
         # if we now have three MINE in any ROW, COLUMN or DIAGONAL, we won
-        mostRecentMoveOnly = [board[index]]
-        if len(iHaveThreeInRow.get_matches(board, mostRecentMoveOnly)) > 0 or \
-             len(iHaveThreeInColumn.get_matches(board, mostRecentMoveOnly)) > 0 or \
-             len(iHaveThreeInDiagonal.get_matches(board, mostRecentMoveOnly)) > 0:
-            ruleId = candidateIndexAndRuleIndex[1]
-            if ruleId not in winningRules:
-                winningRules[ruleId] = list()
-            winningRules[ruleId].append(boardString)
+        most_recent_move_only = [board[index]]
+        if (
+            len(iHaveThreeInRow.get_matches(board, most_recent_move_only)) > 0
+            or len(iHaveThreeInColumn.get_matches(board, most_recent_move_only)) > 0
+            or len(iHaveThreeInDiagonal.get_matches(board, most_recent_move_only)) > 0
+        ):
+            rule_id = candidate_index_and_rule_index[1]
+            if rule_id not in winning_rules:
+                winning_rules[rule_id] = list()
+            winning_rules[rule_id].append(board_string)
             wins += 1
             # go to next board
             continue
@@ -108,19 +135,18 @@ def get_fitness_for_games(genes):
 
         # queue all possible OPPONENT responses
         for square in empties:
-            candiateCopy = board.copy()
-            candiateCopy[square.Index] = Square(square.Index,
-                                                ContentType.Opponent)
-            queue.append(candiateCopy)
+            candidate_copy = board.copy()
+            candidate_copy[square.Index] = Square(square.Index, ContentType.Opponent)
+            queue.append(candidate_copy)
 
     return Fitness(wins, ties, losses, len(genes))
 
 
-def get_move(ruleSet, board, empties, startingRuleIndex=0):
-    ruleSetCopy = ruleSet[:]
+def get_move(rule_set, board, empties, starting_rule_index=0):
+    rule_set_copy = rule_set[:]
 
-    for ruleIndex in range(startingRuleIndex, len(ruleSetCopy)):
-        gene = ruleSetCopy[ruleIndex]
+    for ruleIndex in range(starting_rule_index, len(rule_set_copy)):
+        gene = rule_set_copy[ruleIndex]
         matches = gene.get_matches(board, empties)
         if len(matches) == 0:
             continue
@@ -132,21 +158,22 @@ def get_move(ruleSet, board, empties, startingRuleIndex=0):
     return None
 
 
-def display(candidate, startTime):
-    timeDiff = datetime.datetime.now() - startTime
-    localCopy = candidate.Genes[:]
-    for i in reversed(range(len(localCopy))):
-        localCopy[i] = str(localCopy[i])
+def display(candidate, start_time):
+    time_diff = datetime.datetime.now() - start_time
+    local_copy = candidate.Genes[:]
+    for i in reversed(range(len(local_copy))):
+        local_copy[i] = str(local_copy[i])
 
-    print("\t{}\n{}\n{}".format(
-        '\n\t'.join([d for d in localCopy]),
-        candidate.Fitness,
-        timeDiff))
+    print(
+        "\t{}\n{}\n{}".format(
+            "\n\t".join([d for d in local_copy]), candidate.Fitness, time_diff
+        )
+    )
 
 
-def mutate_add(genes, geneset):
+def mutate_add(genes, gene_set):
     index = random.randrange(0, len(genes) + 1) if len(genes) > 0 else 0
-    genes[index:index] = [random.choice(geneset)]
+    genes[index:index] = [random.choice(gene_set)]
     return True
 
 
@@ -159,11 +186,11 @@ def mutate_remove(genes):
     return True
 
 
-def mutate_replace(genes, geneset):
+def mutate_replace(genes, gene_set):
     if len(genes) < 1:
         return False
     index = random.randrange(0, len(genes))
-    genes[index] = random.choice(geneset)
+    genes[index] = random.choice(gene_set)
     return True
 
 
@@ -180,63 +207,64 @@ def mutate_move(genes):
         return False
     start = random.choice(range(len(genes)))
     stop = start + random.randint(1, 2)
-    toMove = genes[start:stop]
+    to_move = genes[start:stop]
     genes[start:stop] = []
     index = random.choice(range(len(genes)))
     if index >= start:
         index += 1
-    genes[index:index] = toMove
+    genes[index:index] = to_move
     return True
 
 
-def mutate(genes, fnGetFitness, mutationOperators, mutationRoundCounts):
-    initialFitness = fnGetFitness(genes)
-    count = random.choice(mutationRoundCounts)
+def mutate(genes, fn_get_fitness, mutation_operators, mutation_round_counts):
+    initial_fitness = fn_get_fitness(genes)
+    count = random.choice(mutation_round_counts)
     for i in range(1, count + 2):
-        copy = mutationOperators[:]
+        copy = mutation_operators[:]
         func = random.choice(copy)
         while not func(genes):
             copy.remove(func)
             func = random.choice(copy)
-        if fnGetFitness(genes) > initialFitness:
-            mutationRoundCounts.append(i)
+        if fn_get_fitness(genes) > initial_fitness:
+            mutation_round_counts.append(i)
             return
 
 
-def create_geneset():
-    options = [[ContentType.Opponent, [0, 1, 2]],
-               [ContentType.Mine, [0, 1, 2]]]
-    geneset = [
+def create_gene_set():
+    options = [[ContentType.Opponent, [0, 1, 2]], [ContentType.Mine, [0, 1, 2]]]
+    gene_set = [
         RuleMetadata(RowContentFilter, options),
-        RuleMetadata(lambda expectedContent, count: TopRowFilter(), options),
-        RuleMetadata(lambda expectedContent, count: MiddleRowFilter(),
-                     options),
-        RuleMetadata(lambda expectedContent, count: BottomRowFilter(),
-                     options),
+        RuleMetadata(lambda expected_content, count: TopRowFilter(), options),
+        RuleMetadata(lambda expected_content, count: MiddleRowFilter(), options),
+        RuleMetadata(lambda expected_content, count: BottomRowFilter(), options),
         RuleMetadata(ColumnContentFilter, options),
-        RuleMetadata(lambda expectedContent, count: LeftColumnFilter(),
-                     options),
-        RuleMetadata(lambda expectedContent, count: MiddleColumnFilter(),
-                     options),
-        RuleMetadata(lambda expectedContent, count: RightColumnFilter(),
-                     options),
+        RuleMetadata(lambda expected_content, count: LeftColumnFilter(), options),
+        RuleMetadata(lambda expected_content, count: MiddleColumnFilter(), options),
+        RuleMetadata(lambda expected_content, count: RightColumnFilter(), options),
         RuleMetadata(DiagonalContentFilter, options),
-        RuleMetadata(lambda expectedContent, count: DiagonalLocationFilter(),
-                     options),
-        RuleMetadata(lambda expectedContent, count: CornerFilter()),
-        RuleMetadata(lambda expectedContent, count: SideFilter()),
-        RuleMetadata(lambda expectedContent, count: CenterFilter()),
-        RuleMetadata(lambda expectedContent, count:
-                     RowOppositeFilter(expectedContent), options,
-                     needsSpecificContent=True),
-        RuleMetadata(lambda expectedContent, count: ColumnOppositeFilter(
-            expectedContent), options, needsSpecificContent=True),
-        RuleMetadata(lambda expectedContent, count: DiagonalOppositeFilter(
-            expectedContent), options, needsSpecificContent=True),
+        RuleMetadata(lambda expected_content, count: DiagonalLocationFilter(), options),
+        RuleMetadata(lambda expected_content, count: CornerFilter()),
+        RuleMetadata(lambda expected_content, count: SideFilter()),
+        RuleMetadata(lambda expected_content, count: CenterFilter()),
+        RuleMetadata(
+            lambda expected_content, count: RowOppositeFilter(expected_content),
+            options,
+            needs_specific_content=True,
+        ),
+        RuleMetadata(
+            lambda expected_content, count: ColumnOppositeFilter(expected_content),
+            options,
+            needs_specific_content=True,
+        ),
+        RuleMetadata(
+            lambda expected_content, count: DiagonalOppositeFilter(expected_content),
+            options,
+            needs_specific_content=True,
+        ),
     ]
 
     genes = list()
-    for gene in geneset:
+    for gene in gene_set:
         genes.extend(gene.create_rules())
 
     print("created " + str(len(genes)) + " genes")
@@ -245,90 +273,101 @@ def create_geneset():
 
 class TicTacToeTests(unittest.TestCase):
     def test_perfect_knowledge(self):
-        minGenes = 10
-        maxGenes = 20
-        geneset = create_geneset()
-        startTime = datetime.datetime.now()
+        min_genes = 10
+        max_genes = 20
+        gene_set = create_gene_set()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate):
-            display(candidate, startTime)
+        def fn_display(candidate):
+            display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes)
 
-        mutationRoundCounts = [1]
+        mutation_round_counts = [1]
 
-        mutationOperators = [
-            partial(mutate_add, geneset=geneset),
-            partial(mutate_replace, geneset=geneset),
+        mutation_operators = [
+            partial(mutate_add, gene_set=gene_set),
+            partial(mutate_replace, gene_set=gene_set),
             mutate_remove,
             mutate_swap_adjacent,
             mutate_move,
         ]
 
-        def fnMutate(genes):
-            mutate(genes, fnGetFitness, mutationOperators, mutationRoundCounts)
+        def fn_mutate(genes):
+            mutate(genes, fn_get_fitness, mutation_operators, mutation_round_counts)
 
-        def fnCrossover(parent, donor):
-            child = parent[0:int(len(parent) / 2)] + \
-                    donor[int(len(donor) / 2):]
-            fnMutate(child)
+        def fn_crossover(parent, donor):
+            child = parent[0: int(len(parent) / 2)] + donor[int(len(donor) / 2):]
+            fn_mutate(child)
             return child
 
-        def fnCreate():
-            return random.sample(geneset, random.randrange(minGenes, maxGenes))
+        def fn_create():
+            return random.sample(gene_set, random.randrange(min_genes, max_genes))
 
-        optimalFitness = Fitness(620, 120, 0, 11)
-        best = genetic.get_best(fnGetFitness, minGenes, optimalFitness, None,
-                                fnDisplay, fnMutate, fnCreate, max_age=500,
-                                poolSize=20, crossover=fnCrossover)
-        self.assertTrue(not optimalFitness > best.Fitness)
+        optimal_fitness = Fitness(620, 120, 0, 11)
+        best = genetic.get_best(
+            fn_get_fitness,
+            min_genes,
+            optimal_fitness,
+            None,
+            fn_display,
+            fn_mutate,
+            fn_create,
+            max_age=500,
+            pool_size=20,
+            crossover=fn_crossover,
+        )
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
-    def test_tornament(self):
-        minGenes = 10
-        maxGenes = 20
-        geneset = create_geneset()
-        startTime = datetime.datetime.now()
+    @staticmethod
+    def test_tournament():
+        min_genes = 10
+        max_genes = 20
+        gene_set = create_gene_set()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(genes, wins, ties, losses, generation):
+        def fn_display(genes, wins, ties, losses, generation):
             print("-- generation {} --".format(generation))
-            display(genetic.Chromosome(genes,
-                                       Fitness(wins, ties, losses, len(genes)),
-                                       None), startTime)
+            display(
+                genetic.Chromosome(
+                    genes, Fitness(wins, ties, losses, len(genes)), None
+                ),
+                start_time,
+            )
 
-        mutationRoundCounts = [1]
+        mutation_round_counts = [1]
 
-        mutationOperators = [
-            partial(mutate_add, geneset=geneset),
-            partial(mutate_replace, geneset=geneset),
+        mutation_operators = [
+            partial(mutate_add, gene_set=gene_set),
+            partial(mutate_replace, gene_set=gene_set),
             mutate_remove,
             mutate_swap_adjacent,
             mutate_move,
         ]
 
-        def fnMutate(genes):
-            mutate(genes, lambda x: 0, mutationOperators, mutationRoundCounts)
+        def fn_mutate(genes):
+            mutate(genes, lambda x: 0, mutation_operators, mutation_round_counts)
 
-        def fnCrossover(parent, donor):
-            child = parent[0:int(len(parent) / 2)] + \
-                    donor[int(len(donor) / 2):]
-            fnMutate(child)
+        def fn_crossover(parent, donor):
+            child = parent[0: int(len(parent) / 2)] + donor[int(len(donor) / 2):]
+            fn_mutate(child)
             return child
 
-        def fnCreate():
-            return random.sample(geneset, random.randrange(minGenes, maxGenes))
+        def fn_create():
+            return random.sample(gene_set, random.randrange(min_genes, max_genes))
 
-        def fnSortKey(genes, wins, ties, losses):
+        def fn_sort_key(genes, _, ties, losses):
             return -1000 * losses - ties + 1 / len(genes)
 
-        genetic.tournament(fnCreate, fnCrossover, play1on1, fnDisplay,
-                           fnSortKey, 13)
+        genetic.tournament(
+            fn_create, fn_crossover, play1on1, fn_display, fn_sort_key, 13)
 
 
 class ContentType:
-    Empty = 'EMPTY'
-    Mine = 'MINE'
-    Opponent = 'OPPONENT'
+    Empty = "EMPTY"
+    Mine = "MINE"
+    Opponent = "OPPONENT"
 
 
 class Square:
@@ -415,9 +454,9 @@ class Square:
 
 
 class Rule:
-    def __init__(self, descriptionPrefix, expectedContent=None, count=None):
-        self.DescriptionPrefix = descriptionPrefix
-        self.ExpectedContent = expectedContent
+    def __init__(self, description_prefix, expected_content=None, count=None):
+        self.DescriptionPrefix = description_prefix
+        self.ExpectedContent = expected_content
         self.Count = count
 
     def __str__(self):
@@ -430,32 +469,36 @@ class Rule:
 
 
 class RuleMetadata:
-    def __init__(self, create, options=None, needsSpecificContent=True,
-                 needsSpecificCount=True):
+    def __init__(
+        self, create, options=None, needs_specific_content=True,
+            needs_specific_count=True
+    ):
         if options is None:
-            needsSpecificContent = False
-            needsSpecificCount = False
-        if needsSpecificCount and not needsSpecificContent:
-            raise ValueError('needsSpecificCount is only valid if needsSpecificContent is true')
+            needs_specific_content = False
+            needs_specific_count = False
+        if needs_specific_count and not needs_specific_content:
+            raise ValueError(
+                "needs_specific_count is only valid if needs_specific_content is true"
+            )
         self.create = create
         self.options = options
-        self.needsSpecificContent = needsSpecificContent
-        self.needsSpecificCount = needsSpecificCount
+        self.needs_specific_content = needs_specific_content
+        self.needs_specific_count = needs_specific_count
 
     def create_rules(self):
         option = None
         count = None
 
         seen = set()
-        if self.needsSpecificContent:
+        if self.needs_specific_content:
             rules = list()
 
             for optionInfo in self.options:
                 option = optionInfo[0]
-                if self.needsSpecificCount:
-                    optionCounts = optionInfo[1]
+                if self.needs_specific_count:
+                    option_counts = optionInfo[1]
 
-                    for count in optionCounts:
+                    for count in option_counts:
                         gene = self.create(option, count)
                         if str(gene) not in seen:
                             seen.add(str(gene))
@@ -471,40 +514,41 @@ class RuleMetadata:
 
 
 class ContentFilter(Rule):
-    def __init__(self, description, expectedContent, expectedCount,
-                 getValueFromSquare):
-        super().__init__(description, expectedContent, expectedCount)
-        self.getValueFromSquare = getValueFromSquare
+    def __init__(self, description, expected_content,
+                 expected_count, get_value_from_square):
+        super().__init__(description, expected_content, expected_count)
+        self.get_value_from_square = get_value_from_square
 
     def get_matches(self, board, squares):
         result = set()
         for square in squares:
-            m = list(map(lambda i: board[i].Content,
-                         self.getValueFromSquare(square)))
+            m = list(
+                map(lambda i: board[i].Content, self.get_value_from_square(square))
+            )
             if m.count(self.ExpectedContent) == self.Count:
                 result.add(square.Index)
         return result
 
 
 class RowContentFilter(ContentFilter):
-    def __init__(self, expectedContent, expectedCount):
-        super().__init__("its ROW has", expectedContent, expectedCount,
-                         lambda s: s.Row)
+    def __init__(self, expected_content, expected_count):
+        super().__init__(
+            "its ROW has", expected_content, expected_count, lambda s: s.Row)
 
 
 class ColumnContentFilter(ContentFilter):
-    def __init__(self, expectedContent, expectedCount):
-        super().__init__("its COLUMN has", expectedContent, expectedCount,
-                         lambda s: s.Column)
+    def __init__(self, expected_content, expected_count):
+        super().__init__(
+            "its COLUMN has", expected_content, expected_count, lambda s: s.Column
+        )
 
 
 class LocationFilter(Rule):
-    def __init__(self, expectedLocation, containerDescription, func):
-        super().__init__(
-            "is in " + expectedLocation + " " + containerDescription)
+    def __init__(self, expected_location, container_description, func):
+        super().__init__("is in " + expected_location + " " + container_description)
         self.func = func
 
-    def get_matches(self, board, squares):
+    def get_matches(self, _, squares):
         result = set()
         for square in squares:
             if self.func(square):
@@ -513,13 +557,13 @@ class LocationFilter(Rule):
 
 
 class RowLocationFilter(LocationFilter):
-    def __init__(self, expectedLocation, func):
-        super().__init__(expectedLocation, "ROW", func)
+    def __init__(self, expected_location, func):
+        super().__init__(expected_location, "ROW", func)
 
 
 class ColumnLocationFilter(LocationFilter):
-    def __init__(self, expectedLocation, func):
-        super().__init__(expectedLocation, "COLUMN", func)
+    def __init__(self, expected_location, func):
+        super().__init__(expected_location, "COLUMN", func)
 
 
 class TopRowFilter(RowLocationFilter):
@@ -554,15 +598,17 @@ class RightColumnFilter(ColumnLocationFilter):
 
 class DiagonalLocationFilter(LocationFilter):
     def __init__(self):
-        super().__init__("DIAGONAL", "",
-                         lambda square: not (square.IsMiddleRow or
-                                             square.IsMiddleColumn) or
-                                        square.IsCenter)
+        super().__init__(
+            "DIAGONAL",
+            "",
+            lambda square: not (square.IsMiddleRow or square.IsMiddleColumn)
+            or square.IsCenter,
+        )
 
 
 class DiagonalContentFilter(Rule):
-    def __init__(self, expectedContent, count):
-        super().__init__("its DIAGONAL has", expectedContent, count)
+    def __init__(self, expected_content, count):
+        super().__init__("its DIAGONAL has", expected_content, count)
 
     def get_matches(self, board, squares):
         result = set()
@@ -577,26 +623,25 @@ class DiagonalContentFilter(Rule):
 
 class WinFilter(Rule):
     def __init__(self, content):
-        super().__init__("WIN" if content == ContentType
-                         .Mine else "block OPPONENT WIN")
+        super().__init__("WIN" if content == ContentType.Mine else "block OPPONENT WIN")
         self.rowRule = RowContentFilter(content, 2)
         self.columnRule = ColumnContentFilter(content, 2)
         self.diagonalRule = DiagonalContentFilter(content, 2)
 
     def get_matches(self, board, squares):
-        inDiagonal = self.diagonalRule.get_matches(board, squares)
-        if len(inDiagonal) > 0:
-            return inDiagonal
-        inRow = self.rowRule.get_matches(board, squares)
-        if len(inRow) > 0:
-            return inRow
-        inColumn = self.columnRule.get_matches(board, squares)
-        return inColumn
+        in_diagonal = self.diagonalRule.get_matches(board, squares)
+        if len(in_diagonal) > 0:
+            return in_diagonal
+        in_row = self.rowRule.get_matches(board, squares)
+        if len(in_row) > 0:
+            return in_row
+        in_column = self.columnRule.get_matches(board, squares)
+        return in_column
 
 
 class DiagonalOppositeFilter(Rule):
-    def __init__(self, expectedContent):
-        super().__init__("DIAGONAL-OPPOSITE is", expectedContent)
+    def __init__(self, expected_content):
+        super().__init__("DIAGONAL-OPPOSITE is", expected_content)
 
     def get_matches(self, board, squares):
         result = set()
@@ -609,8 +654,8 @@ class DiagonalOppositeFilter(Rule):
 
 
 class RowOppositeFilter(Rule):
-    def __init__(self, expectedContent):
-        super().__init__("ROW-OPPOSITE is", expectedContent)
+    def __init__(self, expected_content):
+        super().__init__("ROW-OPPOSITE is", expected_content)
 
     def get_matches(self, board, squares):
         result = set()
@@ -623,8 +668,8 @@ class RowOppositeFilter(Rule):
 
 
 class ColumnOppositeFilter(Rule):
-    def __init__(self, expectedContent):
-        super().__init__("COLUMN-OPPOSITE is", expectedContent)
+    def __init__(self, expected_content):
+        super().__init__("COLUMN-OPPOSITE is", expected_content)
 
     def get_matches(self, board, squares):
         result = set()
@@ -641,7 +686,7 @@ class CenterFilter(Rule):
         super().__init__("is in CENTER")
 
     @staticmethod
-    def get_matches(board, squares):
+    def get_matches(_, squares):
         result = set()
         for square in squares:
             if square.IsCenter:
@@ -654,7 +699,7 @@ class CornerFilter(Rule):
         super().__init__("is a CORNER")
 
     @staticmethod
-    def get_matches(board, squares):
+    def get_matches(_, squares):
         result = set()
         for square in squares:
             if square.IsCorner:
@@ -667,7 +712,7 @@ class SideFilter(Rule):
         super().__init__("is SIDE")
 
     @staticmethod
-    def get_matches(board, squares):
+    def get_matches(_, squares):
         result = set()
         for square in squares:
             if square.IsSide:
@@ -682,18 +727,18 @@ opponentHasTwoInARow = WinFilter(ContentType.Opponent)
 
 
 class Fitness:
-    def __init__(self, wins, ties, losses, geneCount):
+    def __init__(self, wins, ties, losses, gene_count):
         self.Wins = wins
         self.Ties = ties
         self.Losses = losses
-        totalGames = wins + ties + losses
-        percentWins = 100 * round(wins / totalGames, 3)
-        percentLosses = 100 * round(losses / totalGames, 3)
-        percentTies = 100 * round(ties / totalGames, 3)
-        self.PercentTies = percentTies
-        self.PercentWins = percentWins
-        self.PercentLosses = percentLosses
-        self.GeneCount = geneCount
+        total_games = wins + ties + losses
+        percent_wins = 100 * round(wins / total_games, 3)
+        percent_losses = 100 * round(losses / total_games, 3)
+        percent_ties = 100 * round(ties / total_games, 3)
+        self.PercentTies = percent_ties
+        self.PercentWins = percent_wins
+        self.PercentLosses = percent_losses
+        self.GeneCount = gene_count
 
     def __gt__(self, other):
         if self.PercentLosses != other.PercentLosses:
@@ -707,11 +752,13 @@ class Fitness:
         return self.GeneCount < other.GeneCount
 
     def __str__(self):
-        return "{:.1f}% Losses ({}), {:.1f}% Ties ({}), {:.1f}% Wins ({}), {} rules".format(
-            self.PercentLosses,
-            self.Losses,
-            self.PercentTies,
-            self.Ties,
-            self.PercentWins,
-            self.Wins,
-            self.GeneCount)
+        return "{:.1f}% Losses ({}), {:.1f}% Ties ({}), " \
+               "{:.1f}% Wins ({}), {} rules".format(
+                self.PercentLosses,
+                self.Losses,
+                self.PercentTies,
+                self.Ties,
+                self.PercentWins,
+                self.Wins,
+                self.GeneCount,
+                )

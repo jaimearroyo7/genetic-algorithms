@@ -7,87 +7,87 @@ import lawnmower
 from genetic_algorithms.utils import genetic
 
 
-def get_fitness(genes, fnEvaluate):
-    field, mower, _ = fnEvaluate(genes)
+def get_fitness(genes, fn_evaluate):
+    field, mower, _ = fn_evaluate(genes)
     return Fitness(field.count_mowed(), len(genes), mower.StepCount)
 
 
-def display(candidate, startTime, fnEvaluate):
-    field, mower, program = fnEvaluate(candidate.Genes)
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time, fn_evaluate):
+    field, mower, program = fn_evaluate(candidate.Genes)
+    time_diff = datetime.datetime.now() - start_time
     field.display(mower)
-    print("{}\t{}".format(candidate.Fitness, timeDiff))
+    print("{}\t{}".format(candidate.Fitness, time_diff))
     program.print()
 
 
-def mutate(genes, geneSet, minGenes, maxGenes, fnGetFitness, maxRounds):
-    count = random.randint(1, maxRounds)
-    initialFitness = fnGetFitness(genes)
+def mutate(genes, gene_set, min_genes, max_genes, fn_get_fitness, max_rounds):
+    count = random.randint(1, max_rounds)
+    initial_fitness = fn_get_fitness(genes)
     while count > 0:
         count -= 1
-        if fnGetFitness(genes) > initialFitness:
+        if fn_get_fitness(genes) > initial_fitness:
             return
 
         adding = len(genes) == 0 or (
-            len(genes) < maxGenes and random.randint(0, 5) == 0
+            len(genes) < max_genes and random.randint(0, 5) == 0
         )
         if adding:
-            genes.append(random.choice(geneSet)())
+            genes.append(random.choice(gene_set)())
             continue
 
-        removing = len(genes) > minGenes and random.randint(0, 50) == 0
+        removing = len(genes) > min_genes and random.randint(0, 50) == 0
         if removing:
             index = random.randrange(0, len(genes))
             del genes[index]
             continue
 
         index = random.randrange(0, len(genes))
-        genes[index] = random.choice(geneSet)()
+        genes[index] = random.choice(gene_set)()
 
 
-def create(geneSet, minGenes, maxGenes):
-    numGenes = random.randint(minGenes, maxGenes)
-    genes = [random.choice(geneSet)() for _ in range(1, numGenes)]
+def create(gene_set, min_genes, max_genes):
+    num_genes = random.randint(min_genes, max_genes)
+    genes = [random.choice(gene_set)() for _ in range(1, num_genes)]
     return genes
 
 
-def crossover(parent, otherParent):
-    childGenes = parent[:]
-    if len(parent) <= 2 or len(otherParent) < 2:
-        return childGenes
+def crossover(parent, other_parent):
+    child_genes = parent[:]
+    if len(parent) <= 2 or len(other_parent) < 2:
+        return child_genes
     length = random.randint(1, len(parent) - 2)
     start = random.randrange(0, len(parent) - length)
-    childGenes[start : start + length] = otherParent[start : start + length]
-    return childGenes
+    child_genes[start: start + length] = other_parent[start: start + length]
+    return child_genes
 
 
 class LawnmowerTests(unittest.TestCase):
     def test_mow_turn(self):
         width = height = 8
-        geneSet = [lambda: Mow(), lambda: Turn()]
-        minGenes = width * height
-        maxGenes = int(1.5 * minGenes)
-        maxMutationRounds = 3
-        expectedNumberOfInstructions = 78
+        gene_set = [lambda: Mow(), lambda: Turn()]
+        min_genes = width * height
+        max_genes = int(1.5 * min_genes)
+        max_mutation_rounds = 3
+        expected_number_of_instructions = 78
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ToroidField(width, height, lawnmower.FieldContents.Grass)
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfInstructions,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_instructions,
         )
 
     def test_mow_turn_jump(self):
         width = height = 8
-        geneSet = [
+        gene_set = [
             lambda: Mow(),
             lambda: Turn(),
             lambda: Jump(
@@ -95,29 +95,29 @@ class LawnmowerTests(unittest.TestCase):
                 random.randint(0, min(width, height)),
             ),
         ]
-        minGenes = width * height
-        maxGenes = int(1.5 * minGenes)
-        maxMutationRounds = 1
-        expectedNumberOfInstructions = 64
+        min_genes = width * height
+        max_genes = int(1.5 * min_genes)
+        max_mutation_rounds = 1
+        expected_number_of_instructions = 64
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ToroidField(width, height, lawnmower.FieldContents.Grass)
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfInstructions,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_instructions,
         )
 
     def test_mow_turn_jump_validating(self):
         width = height = 8
-        geneSet = [
+        gene_set = [
             lambda: Mow(),
             lambda: Turn(),
             lambda: Jump(
@@ -125,59 +125,59 @@ class LawnmowerTests(unittest.TestCase):
                 random.randint(0, min(width, height)),
             ),
         ]
-        minGenes = width * height
-        maxGenes = int(1.5 * minGenes)
-        maxMutationRounds = 3
-        expectedNumberOfInstructions = 79
+        min_genes = width * height
+        max_genes = int(1.5 * min_genes)
+        max_mutation_rounds = 3
+        expected_number_of_instructions = 79
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ValidatingField(
                 width, height, lawnmower.FieldContents.Grass
             )
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfInstructions,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_instructions,
         )
 
     def test_mow_turn_repeat(self):
         width = height = 8
-        geneSet = [
+        gene_set = [
             lambda: Mow(),
             lambda: Turn(),
             lambda: Repeat(random.randint(0, 8), random.randint(0, 8)),
         ]
-        minGenes = 3
-        maxGenes = 20
-        maxMutationRounds = 3
-        expectedNumberOfInstructions = 9
-        expectedNumberOfSteps = 88
+        min_genes = 3
+        max_genes = 20
+        max_mutation_rounds = 3
+        expected_number_of_instructions = 9
+        expected_number_of_steps = 88
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ToroidField(width, height, lawnmower.FieldContents.Grass)
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfSteps,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_steps,
         )
 
     def test_mow_turn_jump_func(self):
         width = height = 8
-        geneSet = [
+        gene_set = [
             lambda: Mow(),
             lambda: Turn(),
             lambda: Jump(
@@ -186,117 +186,118 @@ class LawnmowerTests(unittest.TestCase):
             ),
             lambda: Func(),
         ]
-        minGenes = 3
-        maxGenes = 20
-        maxMutationRounds = 3
-        expectedNumberOfInstructions = 18
-        expectedNumberOfSteps = 65
+        min_genes = 3
+        max_genes = 20
+        max_mutation_rounds = 3
+        expected_number_of_instructions = 18
+        expected_number_of_steps = 65
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ToroidField(width, height, lawnmower.FieldContents.Grass)
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfSteps,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_steps,
         )
 
     def test_mow_turn_jump_call(self):
         width = height = 8
-        geneSet = [
+        gene_set = [
             lambda: Mow(),
             lambda: Turn(),
             lambda: Jump(
                 random.randint(0, min(width, height)),
                 random.randint(0, min(width, height)),
             ),
-            lambda: Func(expectCall=True),
+            lambda: Func(expect_call=True),
             lambda: Call(random.randint(0, 5)),
         ]
-        minGenes = 3
-        maxGenes = 20
-        maxMutationRounds = 3
-        expectedNumberOfInstructions = 18
-        expectedNumberOfSteps = 65
+        min_genes = 3
+        max_genes = 20
+        max_mutation_rounds = 3
+        expected_number_of_instructions = 18
+        expected_number_of_steps = 65
 
-        def fnCreateField():
+        def fn_create_field():
             return lawnmower.ToroidField(width, height, lawnmower.FieldContents.Grass)
 
         self.run_with(
-            geneSet,
+            gene_set,
             width,
             height,
-            minGenes,
-            maxGenes,
-            expectedNumberOfInstructions,
-            maxMutationRounds,
-            fnCreateField,
-            expectedNumberOfSteps,
+            min_genes,
+            max_genes,
+            expected_number_of_instructions,
+            max_mutation_rounds,
+            fn_create_field,
+            expected_number_of_steps,
         )
 
     def run_with(
         self,
-        geneSet,
+        gene_set,
         width,
         height,
-        minGenes,
-        maxGenes,
-        expectedNumberOfInstructions,
-        maxMutationRounds,
-        fnCreateField,
-        expectedNumberOfSteps,
+        min_genes,
+        max_genes,
+        expected_number_of_instructions,
+        max_mutation_rounds,
+        fn_create_field,
+        expected_number_of_steps,
     ):
-        mowerStartLocation = lawnmower.Location(int(width / 2), int(height / 2))
-        mowerStartDirection = lawnmower.Directions.South.value
+        mower_start_location = lawnmower.Location(int(width / 2), int(height / 2))
+        mower_start_direction = lawnmower.Directions.South.value
 
-        def fnCreate():
-            return create(geneSet, 1, height)
+        def fn_create():
+            return create(gene_set, 1, height)
 
-        def fnEvaluate(instructions):
+        def fn_evaluate(instructions):
             program = Program(instructions)
-            mower = lawnmower.Mower(mowerStartLocation, mowerStartDirection)
-            field = fnCreateField()
+            mower = lawnmower.Mower(mower_start_location, mower_start_direction)
+            field = fn_create_field()
             try:
                 program.evaluate(mower, field)
             except RecursionError:
                 pass
             return field, mower, program
 
-        def fnGetFitness(genes):
-            return get_fitness(genes, fnEvaluate)
+        def fn_get_fitness(genes):
+            return get_fitness(genes, fn_evaluate)
 
-        startTime = datetime.datetime.now()
+        start_time = datetime.datetime.now()
 
-        def fnDisplay(candidate):
-            display(candidate, startTime, fnEvaluate)
+        def fn_display(candidate):
+            display(candidate, start_time, fn_evaluate)
 
-        def fnMutate(child):
-            mutate(child, geneSet, minGenes, maxGenes, fnGetFitness, maxMutationRounds)
+        def fn_mutate(child):
+            mutate(child, gene_set, min_genes,
+                   max_genes, fn_get_fitness, max_mutation_rounds)
 
-        optimalFitness = Fitness(
-            width * height, expectedNumberOfInstructions, expectedNumberOfSteps
+        optimal_fitness = Fitness(
+            width * height, expected_number_of_instructions, expected_number_of_steps
         )
 
         best = genetic.get_best(
-            fnGetFitness,
+            fn_get_fitness,
             None,
-            optimalFitness,
+            optimal_fitness,
             None,
-            fnDisplay,
-            fnMutate,
-            fnCreate,
+            fn_display,
+            fn_mutate,
+            fn_create,
             max_age=None,
             poolSize=10,
             crossover=crossover,
         )
 
-        self.assertTrue(not optimalFitness > best.Fitness)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
 
 class Mow:
@@ -316,7 +317,7 @@ class Turn:
         pass
 
     @staticmethod
-    def execute(mower, field):
+    def execute(mower, _):
         mower.turn_left()
 
     def __str__(self):
@@ -336,48 +337,48 @@ class Jump:
 
 
 class Repeat:
-    def __init__(self, opCount, times):
-        self.OpCount = opCount
+    def __init__(self, op_count, times):
+        self.OpCount = op_count
         self.Times = times
-        self.Ops = []
+        self.ops = []
 
     def execute(self, mower, field):
         for i in range(self.Times):
-            for op in self.Ops:
+            for op in self.ops:
                 op.execute(mower, field)
 
     def __str__(self):
         return "repeat({},{})".format(
-            " ".join(map(str, self.Ops)) if len(self.Ops) > 0 else self.OpCount,
+            " ".join(map(str, self.ops)) if len(self.ops) > 0 else self.OpCount,
             self.Times,
         )
 
 
 class Func:
-    def __init__(self, expectCall=False):
-        self.Ops = []
-        self.ExpectCall = expectCall
+    def __init__(self, expect_call=False):
+        self.ops = []
+        self.ExpectCall = expect_call
         self.Id = None
 
     def execute(self, mower, field):
-        for op in self.Ops:
+        for op in self.ops:
             op.execute(mower, field)
 
     def __str__(self):
         return "func{1}: {0}".format(
-            " ".join(map(str, self.Ops)), self.Id if self.Id is not None else ""
+            " ".join(map(str, self.ops)), self.Id if self.Id is not None else ""
         )
 
 
 class Call:
-    def __init__(self, funcId=None):
-        self.FuncId = funcId
+    def __init__(self, func_id=None):
+        self.FuncId = func_id
         self.Funcs = None
 
     def execute(self, mower, field):
-        funcId = 0 if self.FuncId is None else self.FuncId
-        if len(self.Funcs) > funcId:
-            self.Funcs[funcId].execute(mower, field)
+        func_id = 0 if self.FuncId is None else self.FuncId
+        if len(self.Funcs) > func_id:
+            self.Funcs[func_id].execute(mower, field)
 
     def __str__(self):
         return "call-{}".format(self.FuncId if self.FuncId is not None else "func")
@@ -392,46 +393,46 @@ class Program:
             if type(temp[index]) is Repeat:
                 start = index + 1
                 end = min(index + temp[index].OpCount + 1, len(temp))
-                temp[index].Ops = temp[start:end]
+                temp[index].ops = temp[start:end]
                 del temp[start:end]
                 continue
 
             if type(temp[index]) is Call:
-                temp[index].Funcs = funcs
+                temp[index].funcs = funcs
 
             if type(temp[index]) is Func:
                 if len(funcs) > 0 and not temp[index].ExpectCall:
                     temp[index] = Call()
-                    temp[index].Funcs = funcs
+                    temp[index].funcs = funcs
                     continue
                 start = index + 1
                 end = len(temp)
                 func = Func()
                 if temp[index].ExpectCall:
                     func.Id = len(funcs)
-                func.Ops = [
+                func.ops = [
                     i
                     for i in temp[start:end]
-                    if type(i) is not Repeat or type(i) is Repeat and len(i.Ops) > 0
+                    if type(i) is not Repeat or type(i) is Repeat and len(i.ops) > 0
                 ]
                 funcs.append(func)
                 del temp[index:end]
 
         for func in funcs:
-            for index in reversed(range(len(func.Ops))):
-                if type(func.Ops[index]) is Call:
-                    func_id = func.Ops[index].FuncId
+            for index in reversed(range(len(func.ops))):
+                if type(func.ops[index]) is Call:
+                    func_id = func.ops[index].FuncId
                     if func_id is None:
                         continue
-                    if func_id >= len(funcs) or len(funcs[func_id].Ops) == 0:
-                        del func.Ops[index]
+                    if func_id >= len(funcs) or len(funcs[func_id].ops) == 0:
+                        del func.ops[index]
 
         for index in reversed(range(len(temp))):
             if type(temp[index]) is Call:
                 func_id = temp[index].FuncId
                 if func_id is None:
                     continue
-                if func_id >= len(funcs) or len(funcs[func_id].Ops) == 0:
+                if func_id >= len(funcs) or len(funcs[func_id].ops) == 0:
                     del temp[index]
         self.Main = temp
         self.Funcs = funcs
@@ -443,17 +444,17 @@ class Program:
     def print(self):
         if self.Funcs is not None:
             for func in self.Funcs:
-                if func.Id is not None and len(func.Ops) == 0:
+                if func.Id is not None and len(func.ops) == 0:
                     continue
                 print(func)
         print(" ".join(map(str, self.Main)))
 
 
 class Fitness:
-    def __init__(self, totalMowed, totalInstructions, stepCount):
-        self.TotalMowed = totalMowed
-        self.TotalInstructions = totalInstructions
-        self.StepCount = stepCount
+    def __init__(self, total_mowed, total_instructions, step_count):
+        self.TotalMowed = total_mowed
+        self.TotalInstructions = total_instructions
+        self.StepCount = step_count
 
     def __gt__(self, other):
         if self.TotalMowed != other.TotalMowed:

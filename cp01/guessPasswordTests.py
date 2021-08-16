@@ -35,7 +35,8 @@ class GuessPasswordTests(unittest.TestCase):
 
         optimal_fitness = len(target)
         best = genetic.get_best(
-            fn_get_fitness, len(target), optimal_fitness, self.gene_set, fn_display
+            fn_get_fitness, len(target), optimal_fitness,
+            self.gene_set, fn_display
         )
         self.assertEqual("".join(best.Genes), target)
 

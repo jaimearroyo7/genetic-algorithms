@@ -7,24 +7,24 @@ from itertools import chain
 from genetic_algorithms.utils import genetic
 
 
-def load_data(localFileName):
+def load_data(local_file_name):
     """expects:
-    HEADER section before DATA section, all lines start in column 0
-    DATA section element all have space in column 0
+    HE_aDER section before D_aT_a section, all lines start in column 0
+    D_aT_a section element all have space in column 0
     <space>1 23.45 67.89
     last line of file is: " EOF"
     """
-    with open(localFileName, mode="r") as infile:
+    with open(local_file_name, mode="r") as infile:
         content = infile.read().splitlines()
-    idToLocationLookup = {}
+    id_to_location_lookup = {}
     for row in content:
         if row[0] != " ":  # HEADERS
             continue
         if row == " EOF":
             break
-        id, x, y = row.split(" ")[1:4]
-        idToLocationLookup[int(id)] = [float(x), float(y)]
-    return idToLocationLookup
+        identifier, x, y = row.split(" ")[1:4]
+        id_to_location_lookup[int(identifier)] = [float(x), float(y)]
+    return id_to_location_lookup
 
 
 class TravelingSalesmanTests(unittest.TestCase):
@@ -32,7 +32,7 @@ class TravelingSalesmanTests(unittest.TestCase):
         genetic.Benchmark.run(lambda: self.test_ulysses16())
 
     def test_8_queens(self):
-        idToLocationLookup = {
+        id_to_location_lookup = {
             "A": [4, 7],
             "B": [2, 6],
             "C": [0, 5],
@@ -42,119 +42,121 @@ class TravelingSalesmanTests(unittest.TestCase):
             "G": [7, 2],
             "H": [6, 4],
         }
-        optimalSequence = ["A", "B", "C", "D", "E", "F", "G", "H"]
-        self.solve(idToLocationLookup, optimalSequence)
+        optimal_sequence = ["A", "B", "C", "D", "E", "F", "G", "H"]
+        self.solve(id_to_location_lookup, optimal_sequence)
 
     def test_ulysses16(self):
-        idToLocationLookup = load_data("ulysses16.tsp")
-        optimalSequence = [14, 13, 12, 16, 1, 3, 2, 4, 8, 15, 5, 11, 9, 10, 7, 6]
-        self.solve(idToLocationLookup, optimalSequence)
+        id_to_location_lookup = load_data("ulysses16.tsp")
+        optimal_sequence = [14, 13, 12, 16, 1, 3, 2, 4, 8, 15, 5, 11, 9, 10, 7, 6]
+        self.solve(id_to_location_lookup, optimal_sequence)
 
-    def solve(self, idToLocationLookup, optimalSequence):
-        geneset = [i for i in idToLocationLookup.keys()]
+    def solve(self, id_to_location_lookup, optimal_sequence):
+        gene_set = [i for i in id_to_location_lookup.keys()]
 
-        def fnCreate():
-            return random.sample(geneset, len(geneset))
+        def fn_create():
+            return random.sample(gene_set, len(gene_set))
 
-        def fnDisplay(candidate):
-            display(candidate, startTime)
+        def fn_display(candidate):
+            display(candidate, start_time)
 
-        def fnGetFitness(genes):
-            return get_fitness(genes, idToLocationLookup)
+        def fn_get_fitness(genes):
+            return get_fitness(genes, id_to_location_lookup)
 
-        def fnMutate(genes):
-            mutate(genes, fnGetFitness)
+        def fn_mutate(genes):
+            mutate(genes, fn_get_fitness)
 
-        def fnCrossover(parent, donor):
-            return crossover(parent, donor, fnGetFitness)
+        def fn_crossover(parent, donor):
+            return crossover(parent, donor, fn_get_fitness)
 
-        optimalFitness = fnGetFitness(optimalSequence)
-        startTime = datetime.datetime.now()
+        optimal_fitness = fn_get_fitness(optimal_sequence)
+        start_time = datetime.datetime.now()
         best = genetic.get_best(
-            fnGetFitness,
+            fn_get_fitness,
             None,
-            optimalFitness,
+            optimal_fitness,
             None,
-            fnDisplay,
-            fnMutate,
-            fnCreate,
+            fn_display,
+            fn_mutate,
+            fn_create,
             max_age=500,
             poolSize=25,
-            crossover=fnCrossover,
+            crossover=fn_crossover,
         )
-        self.assertTrue(not optimalFitness > best.Fitness)
+        self.assertTrue(not optimal_fitness > best.Fitness)
 
 
-def get_distance(locationA, locationB):
-    sideA = locationA[0] - locationB[0]
-    sideB = locationA[1] - locationB[1]
-    sideC = math.sqrt(sideA * sideA + sideB * sideB)
-    return sideC
+def get_distance(location_a, location_b):
+    side_a = location_a[0] - location_b[0]
+    side_b = location_a[1] - location_b[1]
+    side_c = math.sqrt(side_a * side_a + side_b * side_b)
+    return side_c
 
 
-def mutate(genes, fnGetFitness):
+def mutate(genes, fn_get_fitness):
     count = random.randint(2, len(genes))
-    initialFitness = fnGetFitness(genes)
+    initial_itness = fn_get_fitness(genes)
     while count > 0:
         count -= 1
-        indexA, indexB = random.sample(range(len(genes)), 2)
-        genes[indexA], genes[indexB] = genes[indexB], genes[indexA]
-        fitness = fnGetFitness(genes)
-        if fitness > initialFitness:
+        index_a, index_b = random.sample(range(len(genes)), 2)
+        genes[index_a], genes[index_b] = genes[index_b], genes[index_a]
+        fitness = fn_get_fitness(genes)
+        if fitness > initial_itness:
             return
 
 
-def crossover(parentGenes, donorGenes, fnGetFitness):
-    pairs = {Pair(donorGenes[0], donorGenes[-1]): 0}
+def crossover(parent_genes, donor_genes, fn_get_fitness):
+    pairs = {Pair(donor_genes[0], donor_genes[-1]): 0}
 
-    for i in range(len(donorGenes) - 1):
-        pairs[Pair(donorGenes[i], donorGenes[i + 1])] = 0
+    for i in range(len(donor_genes) - 1):
+        pairs[Pair(donor_genes[i], donor_genes[i + 1])] = 0
 
-    tempGenes = parentGenes[:]
-    if Pair(parentGenes[0], parentGenes[-1]) in pairs:
+    temp_genes = parent_genes[:]
+    if Pair(parent_genes[0], parent_genes[-1]) in pairs:
         # find a discontinuity
         found = False
-        for i in range(len(parentGenes) - 1):
-            if Pair(parentGenes[i], parentGenes[i + 1]) in pairs:
+        for i in range(len(parent_genes) - 1):
+            if Pair(parent_genes[i], parent_genes[i + 1]) in pairs:
                 continue
-            tempGenes = parentGenes[i + 1 :] + parentGenes[: i + 1]
+            temp_genes = parent_genes[i + 1:] + parent_genes[: i + 1]
             found = True
             break
         if not found:
             return None
-    runs = [[tempGenes[0]]]
-    for i in range(len(tempGenes) - 1):
-        if Pair(tempGenes[i], tempGenes[i + 1]) in pairs:
-            runs[-1].append(tempGenes[i + 1])
+    runs = [[temp_genes[0]]]
+    for i in range(len(temp_genes) - 1):
+        if Pair(temp_genes[i], temp_genes[i + 1]) in pairs:
+            runs[-1].append(temp_genes[i + 1])
             continue
-        runs.append([tempGenes[i + 1]])
+        runs.append([temp_genes[i + 1]])
 
-    initialFitness = fnGetFitness(parentGenes)
+    initial_itness = fn_get_fitness(parent_genes)
     count = random.randint(2, 20)
-    runIndexes = range(len(runs))
-    childGenes = None
+    run_indexes = range(len(runs))
+    child_genes = None
 
     while count > 0:
         count -= 1
-        for i in runIndexes:
+        for i in run_indexes:
             if len(runs[i]) == 1:
                 continue
             if random.randint(0, len(runs)) == 0:
                 runs[i] = [n for n in reversed(runs[i])]
 
-        indexA, indexB = random.sample(runIndexes, 2)
-        runs[indexA], runs[indexB] = runs[indexB], runs[indexA]
-        childGenes = list(chain.from_iterable(runs))
-        if fnGetFitness(childGenes) > initialFitness:
-            return childGenes
-    return childGenes
+        index_a, index_b = random.sample(run_indexes, 2)
+        runs[index_a], runs[index_b] = runs[index_b], runs[index_a]
+        child_genes = list(chain.from_iterable(runs))
+        if fn_get_fitness(child_genes) > initial_itness:
+            return child_genes
+    return child_genes
 
 
-def get_fitness(genes, idToLocationLookup):
-    fitness = get_distance(idToLocationLookup[genes[0]], idToLocationLookup[genes[-1]])
+def get_fitness(genes, id_to_location_lookup):
+    fitness = get_distance(
+        id_to_location_lookup[genes[0]], id_to_location_lookup[genes[-1]]
+    )
     for i in range(len(genes) - 1):
-        start = idToLocationLookup[genes[i]]
-        end = idToLocationLookup[genes[i + 1]]
+        start = id_to_location_lookup[genes[i]]
+        end = id_to_location_lookup[genes[i + 1]]
         fitness += get_distance(start, end)
 
     return Fitness(round(fitness, 2))
@@ -163,8 +165,8 @@ def get_fitness(genes, idToLocationLookup):
 class Fitness:
     TotalDistance = None
 
-    def __init__(self, totalDistance):
-        self.TotalDistance = totalDistance
+    def __init__(self, total_distance):
+        self.TotalDistance = total_distance
 
     def __gt__(self, other):
         return self.TotalDistance < other.TotalDistance
@@ -190,13 +192,13 @@ class Pair:
         return hash(self.Node) * 397 ^ hash(self.Adjacent)
 
 
-def display(candidate, startTime):
-    timeDiff = datetime.datetime.now() - startTime
+def display(candidate, start_time):
+    time_diff = datetime.datetime.now() - start_time
     print(
         "{0}\t{1}\t{2}\t{3}".format(
             " ".join(map(str, candidate.Genes)),
             candidate.Fitness,
             candidate.Strategy.name,
-            str(timeDiff),
+            str(time_diff),
         )
     )

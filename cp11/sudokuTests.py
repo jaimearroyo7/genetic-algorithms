@@ -15,26 +15,26 @@ class SudokuTests(unittest.TestCase):
         optimal_value = 100
         validation_rules = build_validation_rules()
 
-        def fnCreate():
+        def fn_create():
             return random.sample(gene_set * 9, 81)
 
-        def fnMutate(genes):
+        def fn_mutate(genes):
             mutate(genes, validation_rules)
 
-        def fnDisplay(candidate):
+        def fn_display(candidate):
             display(candidate, start_time)
 
-        def fnGetFitness(genes):
+        def fn_get_fitness(genes):
             return get_fitness(genes, validation_rules)
 
         best = genetic.get_best(
-            fnGetFitness,
+            fn_get_fitness,
             None,
             optimal_value,
             None,
-            fnDisplay,
-            fnMutate,
-            fnCreate,
+            fn_display,
+            fn_mutate,
+            fn_create,
             max_age=50,
         )
         self.assertEqual(best.Fitness, optimal_value)
@@ -48,29 +48,29 @@ def shuffle_in_place(genes, first, last):
 
 
 def mutate(genes, validation_rules):
-    selectedRule = next(
+    selected_rule = next(
         rule for rule in validation_rules if genes[rule.Index] == genes[rule.OtherIndex]
     )
 
-    if selectedRule is None:
+    if selected_rule is None:
         return
 
-    if index_row(selectedRule.OtherIndex) % 3 == 2 and random.randint(0, 10) == 0:
-        sectionStart = section_start(selectedRule.Index)
-        current = selectedRule.OtherIndex
-        while selectedRule.OtherIndex == current:
-            shuffle_in_place(genes, sectionStart, 80)
-            selectedRule = next(
+    if index_row(selected_rule.OtherIndex) % 3 == 2 and random.randint(0, 10) == 0:
+        sec_start = section_start(selected_rule.Index)
+        current = selected_rule.OtherIndex
+        while selected_rule.OtherIndex == current:
+            shuffle_in_place(genes, sec_start, 80)
+            selected_rule = next(
                 rule
                 for rule in validation_rules
                 if genes[rule.Index] == genes[rule.OtherIndex]
             )
         return
-    row = index_row(selectedRule.OtherIndex)
+    row = index_row(selected_rule.OtherIndex)
     start = row * 9
-    indexA = selectedRule.OtherIndex
-    indexB = random.randrange(start, len(genes))
-    genes[indexA], genes[indexB] = genes[indexB], genes[indexA]
+    index_a = selected_rule.OtherIndex
+    index_b = random.randrange(start, len(genes))
+    genes[index_a], genes[index_b] = genes[index_b], genes[index_a]
 
 
 def get_fitness(genes, validation_rules):
@@ -93,7 +93,7 @@ def display(candidate, start_time):
     time_diff = datetime.datetime.now() - start_time
     for row in range(9):
         line = " | ".join(
-            " ".join(str(i) for i in candidate.Genes[row * 9 + i : row * 9 + i + 3])
+            " ".join(str(i) for i in candidate.Genes[row * 9 + i:row * 9 + i + 3])
             for i in [0, 3, 6]
         )
         print("", line)
