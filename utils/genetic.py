@@ -2,8 +2,8 @@ import random
 import statistics
 import sys
 import time
-from enum import Enum
 from bisect import bisect_left
+from enum import Enum
 from math import exp
 
 

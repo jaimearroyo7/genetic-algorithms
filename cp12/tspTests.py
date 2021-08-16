@@ -1,8 +1,9 @@
-import unittest
 import datetime
 import math
 import random
+import unittest
 from itertools import chain
+
 from genetic_algorithms.utils import genetic
 
 

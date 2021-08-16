@@ -3,6 +3,7 @@ import random
 import unittest
 
 import circuits
+
 from genetic_algorithms.utils import genetic
 
 

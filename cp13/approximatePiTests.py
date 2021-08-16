@@ -1,9 +1,10 @@
-import unittest
 import datetime
 import math
 import random
-import time
 import sys
+import time
+import unittest
+
 from genetic_algorithms.utils import genetic
 
 

@@ -2,8 +2,9 @@ import datetime
 import random
 import unittest
 
-from genetic_algorithms.utils import genetic
 import lawnmower
+
+from genetic_algorithms.utils import genetic
 
 
 def get_fitness(genes, fnEvaluate):
